@@ -1,0 +1,53 @@
+/** Establishes the exact visual tokens and global reset for Verity Lex. */
+
+@import url("https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@1,600&display=swap");
+
+:root {
+  /* Warm survey palette: navy + copper on warm paper. Token names kept so nothing else changes. */
+  --cream: #f1ead9;   /* warm paper background */
+  --cream2: #e8dfc9;
+  --card: #f6f0e2;     /* cards */
+  --teal: #1b2b45;     /* now deep navy (dark panels/ink) */
+  --teal2: #14223a;    /* darker navy */
+  --orange: #b0703a;   /* now copper (accent/CTA) */
+  --sage: #9aa7a0;
+  --ink: #1e2a40;      /* near-navy body text */
+  --muted: #6e7686;
+  --amber: #a9713e;    /* warm copper-amber for not-located tag */
+  --line: #d9cebb;     /* warm hairline */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: "Inter", system-ui, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button:focus-visible,
+input:focus-visible,
+a:focus-visible {
+  outline: 3px solid var(--orange);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

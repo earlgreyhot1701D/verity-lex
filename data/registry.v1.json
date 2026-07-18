@@ -1,0 +1,79 @@
+{
+  "version": "1.0",
+  "note": "Expected-artifacts registry. Every item traces to an external authority, not our opinion. Weights sum to 100. Seed from themis-atlas-rubric-v1.md.",
+  "artifacts": [
+    {
+      "id": "genai_policy",
+      "name": "Generative AI Use Policy",
+      "authority": { "name": "Cal. Rule of Court 10.430", "url": "https://courts.ca.gov/cms/rules/index/ten/rule10_430", "citation": "Courts not prohibiting GenAI must adopt a use policy; effective 2025-09-01, deadline 2025-12-15." },
+      "tier": "required", "dimension": "A", "weight": 35,
+      "elements": ["no_nonpublic_data", "no_discrimination", "verify_accuracy", "remove_harmful", "disclose_ai_output", "comply_laws_ethics"],
+      "canShow": "whether a compliant policy is published and how complete it is",
+      "cantShow": "whether staff actually follow it"
+    },
+    {
+      "id": "judicial_officer_guidance",
+      "name": "Judicial-officer GenAI guidance",
+      "authority": { "name": "Cal. Standard of Judicial Administration 10.80", "url": "https://courts.ca.gov/cms/rules/index/standards/Standard10_80", "citation": "Standard (guideline) for judicial officers' GenAI use." },
+      "tier": "recommended", "dimension": "A", "weight": 8,
+      "canShow": "whether public materials reflect 10.80-aligned guidance",
+      "cantShow": "individual judicial-officer practice"
+    },
+    {
+      "id": "records_retention",
+      "name": "Records management / retention",
+      "authority": { "name": "Gov. Code 68150 + Trial Court Records Manual", "url": "https://california.public.law/codes/ca_gov't_code_section_68150", "citation": "Management/retention of trial court records." },
+      "tier": "required", "dimension": "B", "weight": 10,
+      "canShow": "a published retention schedule or records policy",
+      "cantShow": "actual retention practice"
+    },
+    {
+      "id": "data_security_privacy",
+      "name": "Data security & privacy posture",
+      "authority": { "name": "Rule 10.430 nonpublic-data duty; protected/CJI handling", "url": "https://courts.ca.gov/cms/rules/index/ten/rule10_430", "citation": "Duty to protect nonpublic data." },
+      "tier": "recommended", "dimension": "B", "weight": 9,
+      "canShow": "a published privacy policy or security posture (often not public)",
+      "cantShow": "internal controls"
+    },
+    {
+      "id": "public_access_records",
+      "name": "Public access to judicial administrative records",
+      "authority": { "name": "Cal. Rule of Court 10.500", "url": "https://courts.ca.gov/cms/rules/index/ten/rule10_500", "citation": "Public access to judicial administrative records." },
+      "tier": "required", "dimension": "B", "weight": 8,
+      "canShow": "whether a Rule 10.500 access process is published",
+      "cantShow": "responsiveness in practice"
+    },
+    {
+      "id": "strategic_plan",
+      "name": "Published strategic plan",
+      "authority": { "name": "Judicial Council planning", "url": "https://courts.ca.gov/", "citation": "Multi-year strategic plan signals planning maturity." },
+      "tier": "recommended", "dimension": "C", "weight": 8,
+      "canShow": "a current published strategic plan",
+      "cantShow": "execution"
+    },
+    {
+      "id": "technology_plan",
+      "name": "Published technology plan",
+      "authority": { "name": "Judicial Council technology planning (ITAC)", "url": "https://courts.ca.gov/advisory-body/technology-planning-task-force", "citation": "Court/branch tech plan signals modernization capacity." },
+      "tier": "recommended", "dimension": "C", "weight": 8,
+      "canShow": "a published technology plan",
+      "cantShow": "delivery"
+    },
+    {
+      "id": "language_access",
+      "name": "Language access plan / services",
+      "authority": { "name": "CA Strategic Plan for Language Access", "url": "https://languageaccess.courts.ca.gov/", "citation": "Language access is required public-service readiness." },
+      "tier": "recommended", "dimension": "C", "weight": 7,
+      "canShow": "published language-access services or plan",
+      "cantShow": "on-the-ground quality"
+    },
+    {
+      "id": "ai_framework_alignment",
+      "name": "AI governance framework alignment",
+      "authority": { "name": "NIST AI RMF 1.0", "url": "https://airc.nist.gov/airmf-resources/airmf/", "citation": "Govern/Map/Measure/Manage; aspirational." },
+      "tier": "recommended", "dimension": "C", "weight": 7,
+      "canShow": "a public reference to a recognized AI framework",
+      "cantShow": "depth of adoption"
+    }
+  ]
+}

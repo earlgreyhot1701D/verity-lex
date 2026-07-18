@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ExtractionResult",
+  "description": "What the GPT-5.6 extractor must return for a single fetched document. The model extracts signals; it never scores. Everything must be grounded in quotedSpan from the document.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["sourceUrl", "signals"],
+  "properties": {
+    "sourceUrl": { "type": "string" },
+    "signals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["artifactId", "present", "quotedSpan"],
+        "properties": {
+          "artifactId": {
+            "type": "string",
+            "description": "must match an id in registry.v1.json"
+          },
+          "present": {
+            "type": "boolean",
+            "description": "true ONLY if the document itself evidences this artifact"
+          },
+          "quotedSpan": {
+            "type": "string",
+            "description": "exact text from the document backing present=true; empty string if present=false"
+          },
+          "elementsPresent": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "for element-scored artifacts (e.g. genai_policy), which required elements the text satisfies"
+          }
+        }
+      }
+    }
+  }
+}

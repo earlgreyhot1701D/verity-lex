@@ -1,0 +1,72 @@
+{
+  "about": "Acceptance criteria for the PURE rule engine (Block 1). Codex must make evaluate(signals, registry) reproduce every expected output exactly. No model involved.",
+  "scoring_rules": {
+    "coverage": "element-scored artifact (has elements): coverage = elementsPresent.length / elements.length. Otherwise coverage = 1.0 if present with a source, else 0.",
+    "points_per_artifact": "weight * coverage, ONLY when status is found or verified. not_located contributes 0.",
+    "no_source_rule": "a signal with present=true but hasSource=false is DOWNGRADED to status not_located and contributes 0. Never a `found` without a source.",
+    "status": "found = present && hasSource. not_located = otherwise. verified is set only by human step (not by this engine).",
+    "unseen": "list of artifactIds whose status is not_located (includes artifacts absent from the signal list).",
+    "rounding": "score.points and byDimension rounded to 1 decimal place, half up.",
+    "total_weight": 100
+  },
+  "fixtures": [
+    {
+      "name": "sb_partial_realistic",
+      "description": "GenAI policy fully present, strategic + tech plans present, everything else not located.",
+      "input": {
+        "institution": "Santa Barbara Superior Court",
+        "signals": [
+          { "artifactId": "genai_policy", "present": true, "hasSource": true, "elementsPresent": ["no_nonpublic_data","no_discrimination","verify_accuracy","remove_harmful","disclose_ai_output","comply_laws_ethics"] },
+          { "artifactId": "strategic_plan", "present": true, "hasSource": true },
+          { "artifactId": "technology_plan", "present": true, "hasSource": true }
+        ]
+      },
+      "expected": {
+        "score": { "points": 51.0, "outOf": 100, "byDimension": { "A": 35.0, "B": 0.0, "C": 16.0 } },
+        "statuses": { "genai_policy": "found", "strategic_plan": "found", "technology_plan": "found" },
+        "coverage": { "genai_policy": 1.0 },
+        "unseen": ["judicial_officer_guidance","records_retention","data_security_privacy","public_access_records","language_access","ai_framework_alignment"]
+      }
+    },
+    {
+      "name": "genai_partial_elements",
+      "description": "GenAI policy present but only 3 of 6 required elements. Nothing else.",
+      "input": {
+        "institution": "Test Court A",
+        "signals": [
+          { "artifactId": "genai_policy", "present": true, "hasSource": true, "elementsPresent": ["no_nonpublic_data","verify_accuracy","comply_laws_ethics"] }
+        ]
+      },
+      "expected": {
+        "score": { "points": 17.5, "outOf": 100, "byDimension": { "A": 17.5, "B": 0.0, "C": 0.0 } },
+        "statuses": { "genai_policy": "found" },
+        "coverage": { "genai_policy": 0.5 },
+        "unseen": ["judicial_officer_guidance","records_retention","data_security_privacy","public_access_records","strategic_plan","technology_plan","language_access","ai_framework_alignment"]
+      }
+    },
+    {
+      "name": "no_source_downgrade",
+      "description": "GenAI policy claimed present but with NO source. Must downgrade to not_located and score 0. This guards the whole trust model.",
+      "input": {
+        "institution": "Test Court B",
+        "signals": [
+          { "artifactId": "genai_policy", "present": true, "hasSource": false, "elementsPresent": ["no_nonpublic_data","no_discrimination"] }
+        ]
+      },
+      "expected": {
+        "score": { "points": 0.0, "outOf": 100, "byDimension": { "A": 0.0, "B": 0.0, "C": 0.0 } },
+        "statuses": { "genai_policy": "not_located" },
+        "unseen_includes": ["genai_policy"]
+      }
+    },
+    {
+      "name": "empty_scan",
+      "description": "No signals at all. Everything not located, score 0. The tool asserts nothing.",
+      "input": { "institution": "Test Court C", "signals": [] },
+      "expected": {
+        "score": { "points": 0.0, "outOf": 100, "byDimension": { "A": 0.0, "B": 0.0, "C": 0.0 } },
+        "unseen_count": 9
+      }
+    }
+  ]
+}
