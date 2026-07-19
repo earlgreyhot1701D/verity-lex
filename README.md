@@ -118,6 +118,17 @@ TAVILY_API_KEY=...   # discover (/search) and fetch (/extract)
 
 Keys are read server-side only, never logged, never shipped to the client.
 
+### Docker
+
+The production [`Dockerfile`](./Dockerfile) uses a multi-stage Node 22 Alpine build, prunes development dependencies, and runs the stateless Next.js service as a non-root user. Secrets are not baked into the image; pass them at runtime. Without an env file, the container still runs with the stub model and cached Santa Barbara result.
+
+```bash
+docker build -t verity-lex .
+docker run --rm -p 3000:3000 --env-file .env.local verity-lex
+```
+
+The container exposes the app at http://localhost:3000.
+
 ### Sample data
 
 - `data/mockScan.ts` is the pre-cached Santa Barbara `ScanResult` the app serves by default
