@@ -35,7 +35,7 @@ export function createOpenAIModelClient(): ModelClient {
   return {
     async complete(request) {
       const response = await client.responses.create({
-        model: "gpt-5.6",
+        model: "gpt-5.6-terra",
         instructions: request.system,
         input: request.input,
         text: request.responseFormat === "json" ? { format: { type: "json_object" } } : undefined,

@@ -106,3 +106,7 @@ The timeout defaults can be overridden for a controlled canary with `SITES_INSTA
 
 - [vinext Documentation](https://github.com/cloudflare/vinext)
 - [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+
+## Design decisions
+
+- Model: `gpt-5.6-terra`, pinned 2026-07-19. Chosen over Sol because structured extraction showed no visible quality gain at roughly twice the input cost, and over Luna because legal-document extraction benefits from additional quality headroom. The model only reads and extracts; it never assigns the score, so tier choice affects extraction quality and cost, not scoring.
