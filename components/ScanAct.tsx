@@ -7,11 +7,15 @@ import styles from "@/styles/readiness-register.module.css";
 
 interface ScanActProps {
   institution: string;
+  targetDomain: string;
+  onObserve: (institution: string, targetDomain: string) => void;
 }
 
-export function ScanAct({ institution }: ScanActProps) {
+export function ScanAct({ institution, targetDomain, onObserve }: ScanActProps) {
   const observe = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    onObserve(String(form.get("court") ?? ""), targetDomain);
     document.getElementById("observation")?.scrollIntoView({ behavior: "smooth" });
   };
 
