@@ -34,13 +34,15 @@ export async function runAgentLoop(options: AgentOptions): Promise<ScanResult> {
   const runLog: ScanResult["runLog"] = [];
   const discovered = new Map<string, DiscoveryResult>();
   const fetched = new Map<string, FetchResult>();
+  const extractedUrls = new Set<string>();
+  const failedExtracts = new Map<string, number>();
   const sources = new Map<string, Source>();
   const signals: RuleSignal[] = [];
   let fetches = 0;
   let iterations = 0;
 
   while (canContinue(iterations, fetches, options.limits)) {
-    const action = await nextAction(options.model, options.institution, Array.from(discovered.keys()), Array.from(fetched.keys()));
+    const action = await nextAction(options.model, options.institution, Array.from(discovered.keys()), Array.from(fetched.keys()), Array.from(extractedUrls), failedExtracts);
     iterations += 1;
     runLog.push(step("plan", action.reason, true));
 
@@ -66,7 +68,17 @@ export async function runAgentLoop(options: AgentOptions): Promise<ScanResult> {
     }
 
     if (action.action === "extract" && action.url && fetched.get(action.url)?.ok) {
-      await observeExtraction(options, fetched.get(action.url) as FetchResult, signals, sources, runLog);
+      const failures = failedExtracts.get(action.url) ?? 0;
+      if (failures >= 2) {
+        runLog.push(step("self_check", `extract retry cap reached for ${action.url}`, false));
+        continue;
+      }
+      const succeeded = await observeExtraction(options, fetched.get(action.url) as FetchResult, signals, sources, runLog);
+      if (succeeded) {
+        extractedUrls.add(action.url);
+      } else {
+        failedExtracts.set(action.url, failures + 1);
+      }
       continue;
     }
 
@@ -92,7 +104,7 @@ async function observeExtraction(
   signals: RuleSignal[],
   sources: Map<string, Source>,
   runLog: ScanResult["runLog"],
-): Promise<void> {
+): Promise<boolean> {
   try {
     const extracted = await options.tools.extract(fetched.url, fetched.text);
     for (const signal of extracted.signals) {
@@ -107,16 +119,18 @@ async function observeExtraction(
       }
     }
     runLog.push(step("extract", `extracted ${extracted.signals.length} signal(s)`, true));
+    return true;
   } catch (error) {
     logFailure("extract", error, { url: fetched.url });
     runLog.push(step("extract", `extract failed ${fetched.url}`, false));
+    return false;
   }
 }
 
-async function nextAction(model: ModelClient, institution: string, discoveredUrls: string[], fetchedUrls: string[]): Promise<AgentAction> {
+async function nextAction(model: ModelClient, institution: string, discoveredUrls: string[], fetchedUrls: string[], extractedUrls: string[], failedExtracts: Map<string, number>): Promise<AgentAction> {
   const raw = await model.complete({
     system: "You are directing a bounded public-record scan. Reply with ONE JSON object: {\"reason\": string, \"action\": \"discover\" | \"fetch\" | \"extract\" | \"finish\", \"query\": string, \"url\": string}. Rules: action discover REQUIRES query (a search phrase for one of the registry artifacts, e.g. generative AI use policy, records retention schedule, strategic plan, adopted budget, language access). action fetch REQUIRES url, chosen ONLY from discoveredUrls. action extract REQUIRES url, chosen ONLY from fetchedUrls. Omit unused fields. Choose finish when every artifact has been searched or evidence is exhausted.",
-    input: JSON.stringify({ institution, discoveredUrls, fetchedUrls }),
+    input: JSON.stringify({ institution, discoveredUrls, fetchedUrls, extractedUrls, failedExtracts: Object.fromEntries(failedExtracts) }),
     responseFormat: "json",
   });
   const parsed = JSON.parse(raw) as Partial<AgentAction>;
