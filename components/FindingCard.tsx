@@ -1,52 +1,36 @@
 /** One finding as a card: Found / Not-located / Verified, with citation and pips. */
 
+import registryData from "@/data/registry.v1.json";
 import type { Finding } from "@/lib/types";
 import styles from "@/styles/readiness-register.module.css";
 
-const LABELS: Record<
-  string,
-  { name: string; authority: string; category: string }
-> = {
-  genai_policy: {
-    name: "Generative AI Use Policy",
-    authority: "Cal. Rule of Court 10.430 · Required",
-    category: "Court policy",
-  },
-  strategic_plan: {
-    name: "Strategic Plan 2025–2029",
-    authority: "Judicial Council planning · Recommended",
-    category: "Published plan",
-  },
-  published_budget: {
-    name: "FY25–26 Adopted Budget",
-    authority: "Public fiscal transparency · Recommended",
-    category: "Adopted budget",
-  },
-  records_retention: {
-    name: "Records Retention Schedule",
-    authority: "Gov. Code 68150 · Required",
-    category: "Records management",
-  },
-  public_access_records: {
-    name: "Rule 10.500 Access Process",
-    authority: "Cal. Rule of Court 10.500 · Required",
-    category: "Public records index",
-  },
-  language_access: {
-    name: "Language Access Services",
-    authority: "CA Strategic Plan for Language Access · Recommended",
-    category: "Public service",
-  },
-};
+interface RegistryArtifact {
+  id: string;
+  name: string;
+  authority: { name: string; citation: string };
+  tier: "required" | "recommended";
+  elements?: string[];
+}
+
+const artifacts = (registryData as { artifacts: RegistryArtifact[] }).artifacts;
+
+const humanize = (id: string) =>
+  id.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 
 const fileName = (url: string) => url.split("/").pop() || url;
 
 export function FindingCard({ finding }: { finding: Finding }) {
-  const meta = LABELS[finding.artifactId] ?? {
-    name: finding.artifactId,
+  const artifact = artifacts.find((item) => item.id === finding.artifactId);
+  const meta = artifact ? {
+    name: artifact.name,
+    authority: `${artifact.authority.citation} · ${artifact.tier === "required" ? "Required" : "Recommended"}`,
+    category: artifact.authority.name,
+  } : {
+    name: humanize(finding.artifactId),
     authority: "",
-    category: "",
+    category: "Unregistered artifact",
   };
+  const elementsTotal = artifact?.elements?.length ?? 0;
   const badge =
     finding.status === "verified"
       ? "VERIFIED"
@@ -69,12 +53,12 @@ export function FindingCard({ finding }: { finding: Finding }) {
       <h4>{meta.name}</h4>
       <p className={styles.findingText}>{meta.authority}</p>
 
-      {finding.elementsPresent ? (
+      {finding.elementsPresent && elementsTotal > 0 ? (
         <div
           className={styles.pips}
-          aria-label={`${finding.elementsPresent.length} of 6 elements located`}
+          aria-label={`${finding.elementsPresent.length} of ${elementsTotal} elements located`}
         >
-          {Array.from({ length: 6 }).map((_, index) => (
+          {Array.from({ length: elementsTotal }).map((_, index) => (
             <span
               key={index}
               className={`${styles.pip} ${
@@ -84,7 +68,7 @@ export function FindingCard({ finding }: { finding: Finding }) {
             />
           ))}
           <span className={`${styles.pipLabel} ${styles.mono}`}>
-            {finding.elementsPresent.length} of 6 elements
+            {finding.elementsPresent.length} of {elementsTotal} elements
           </span>
         </div>
       ) : null}
