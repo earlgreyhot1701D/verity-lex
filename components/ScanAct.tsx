@@ -32,9 +32,11 @@ export function ScanAct({ onObserve, onLoadSample }: ScanActProps) {
         </div>
         <div className={`${styles.navLinks} ${styles.mono}`} aria-label="Page sections">
           <a href="#scan">Scan</a>
-          <span>Method</span>
-          <span>Rubric</span>
-          <span>Field Notes</span>
+          <a href="/methods">Method</a>
+          <a href="/methods#methods-title">Rubric</a>
+          <a href="/#observation">Field Notes</a>
+          <a href="https://earlgreyhot1701d.github.io/Clew-Labs/">About</a>
+          <a href="https://www.linkedin.com/in/la-shara-cordero-a0017a11/">LinkedIn</a>
         </div>
       </nav>
 

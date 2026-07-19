@@ -218,6 +218,10 @@ Honest list, current as of submission:
 
 MIT. See [LICENSE](./LICENSE).
 
+## About
+
+Verity Lex was created by [La Shara Cordero](https://www.linkedin.com/in/la-shara-cordero-a0017a11/) through [Clew Labs](https://earlgreyhot1701d.github.io/Clew-Labs/).
+
 ---
 
 *Verity Lex, engine name Themis Atlas. Built by La Shara Cordero with Codex and GPT-5.6, verified by hand.*
