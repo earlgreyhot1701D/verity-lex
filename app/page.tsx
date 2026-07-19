@@ -12,12 +12,11 @@ import type { ScanResult } from "@/lib/types";
 import { validateScanInput } from "@/lib/validate";
 import { useState } from "react";
 
-const SANTA_BARBARA_DOMAIN = "santabarbara.courts.ca.gov";
-
 export default function Home() {
   const [scan, setScan] = useState<ScanResult>(cachedSantaBarbaraScan);
   const [error, setError] = useState("");
   const [phase, setPhase] = useState<"idle" | "observing" | "done">("idle");
+  const [scanFormKey, setScanFormKey] = useState(0);
 
   const observe = async (institution: string, targetDomain: string) => {
     const validated = validateScanInput(institution, targetDomain);
@@ -51,11 +50,12 @@ export default function Home() {
     setScan(cachedSantaBarbaraScan);
     setPhase("idle");
     setError("");
+    setScanFormKey((current) => current + 1);
   };
 
   return (
     <main>
-      <ScanAct institution={scan.institution} targetDomain={SANTA_BARBARA_DOMAIN} onObserve={observe} />
+      <ScanAct key={scanFormKey} onObserve={observe} />
       {error ? <p role="alert">{error}</p> : null}
       <MarqueeTicker />
       <ObservationAct

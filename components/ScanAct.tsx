@@ -2,20 +2,22 @@
 
 "use client";
 
+import { californiaSuperiorCourts } from "@/data/courts.ca";
 import type { FormEvent } from "react";
 import styles from "@/styles/readiness-register.module.css";
 
 interface ScanActProps {
-  institution: string;
-  targetDomain: string;
   onObserve: (institution: string, targetDomain: string) => void;
 }
 
-export function ScanAct({ institution, targetDomain, onObserve }: ScanActProps) {
+export function ScanAct({ onObserve }: ScanActProps) {
   const observe = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    onObserve(String(form.get("court") ?? ""), targetDomain);
+    const selectedName = String(form.get("court") ?? "");
+    const court = californiaSuperiorCourts.find((item) => item.name === selectedName);
+    if (!court?.live || !court.domain) return;
+    onObserve(court.name, court.domain);
     document.getElementById("observation")?.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -87,11 +89,23 @@ export function ScanAct({ institution, targetDomain, onObserve }: ScanActProps) 
             Public record scan. Deeper repository and staff readiness belong to a later
             tier.
           </p>
+          <p className={`${styles.finePrint} ${styles.mono}`}>
+            CALIFORNIA SUPERIOR COURTS · REGISTRY V1.0 IS BUILT ON CALIFORNIA AUTHORITIES
+          </p>
           <div className={styles.field}>
             <label className={styles.visuallyHidden} htmlFor="court-name">
               Court name
             </label>
-            <input id="court-name" name="court" defaultValue={institution} required />
+            <select id="court-name" name="court" defaultValue="" required>
+              <option value="" disabled>
+                SELECT A CALIFORNIA SUPERIOR COURT
+              </option>
+              {californiaSuperiorCourts.map((court) => (
+                <option key={court.name} value={court.name} disabled={!court.live}>
+                  {court.name}{court.live ? "" : " · coming soon"}
+                </option>
+              ))}
+            </select>
             <button type="submit">OBSERVE →</button>
           </div>
           <p className={`${styles.finePrint} ${styles.mono}`}>
