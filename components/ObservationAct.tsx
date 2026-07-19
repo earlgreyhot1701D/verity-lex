@@ -30,11 +30,19 @@ export function ObservationAct({ runLog, phase, onClear }: ObservationActProps) 
         </p>
         {phase === "done" ? (
           <AgentLog steps={runLog} />
+        ) : phase === "observing" ? (
+          <div className={`${styles.observingState} ${styles.mono}`} role="status">
+            <span className={styles.observingDot} aria-hidden="true" />
+            <span>OBSERVING ·</span>
+            <span className={styles.observingPhrases}>
+              <span>SEARCHING THE PUBLIC RECORD</span>
+              <span>READING WHAT IT FINDS</span>
+              <span>EXTRACTING CITED EVIDENCE</span>
+            </span>
+          </div>
         ) : (
           <p className={`${styles.sectionMark} ${styles.mono}`}>
-            {phase === "observing"
-              ? "OBSERVING · THE AGENT IS READING THE PUBLIC RECORD"
-              : "NO SCAN YET · PRESS OBSERVE TO WATCH THE AGENT WORK"}
+            NO SCAN YET · PRESS OBSERVE TO WATCH THE AGENT WORK
           </p>
         )}
       </section>
