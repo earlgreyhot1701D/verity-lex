@@ -108,13 +108,23 @@ async function observeExtraction(
   try {
     const extracted = await options.tools.extract(fetched.url, fetched.text);
     for (const signal of extracted.signals) {
-      signals.push({
+      const candidate: RuleSignal = {
         artifactId: signal.artifactId,
         present: signal.present,
         hasSource: signal.present && signal.quotedSpan.length > 0,
         ...(signal.elementsPresent ? { elementsPresent: signal.elementsPresent } : {}),
-      });
-      if (signal.present && signal.quotedSpan.length > 0) {
+      };
+      const existingIndex = signals.findIndex((item) => item.artifactId === signal.artifactId);
+      const existing = existingIndex >= 0 ? signals[existingIndex] : undefined;
+      if (existing && evidenceStrength(candidate) <= evidenceStrength(existing)) {
+        continue;
+      }
+      if (existingIndex >= 0) {
+        signals[existingIndex] = candidate;
+      } else {
+        signals.push(candidate);
+      }
+      if (candidate.hasSource) {
         sources.set(signal.artifactId, { url: extracted.sourceUrl, quotedSpan: signal.quotedSpan, fetchedAt: fetched.fetchedAt });
       }
     }
@@ -125,6 +135,11 @@ async function observeExtraction(
     runLog.push(step("extract", `extract failed ${fetched.url}`, false));
     return false;
   }
+}
+
+function evidenceStrength(signal: RuleSignal): number {
+  const sourceStrength = signal.present && signal.hasSource ? 1_000 : 0;
+  return sourceStrength + new Set(signal.elementsPresent ?? []).size;
 }
 
 async function nextAction(model: ModelClient, institution: string, discoveredUrls: string[], fetchedUrls: string[], extractedUrls: string[], failedExtracts: Map<string, number>): Promise<AgentAction> {
