@@ -27,11 +27,13 @@ export function FindingCard({ finding }: { finding: Finding }) {
   const artifact = artifacts.find((item) => item.id === finding.artifactId);
   const meta = artifact ? {
     name: artifact.name,
-    authority: `${artifact.authority.citation} · ${artifact.tier === "required" ? "Required" : "Recommended"}`,
+    authority: `${artifact.authority.name} · ${artifact.tier === "required" ? "Required" : "Recommended"}`,
+    description: artifact.authority.citation,
     category: artifact.authority.name,
   } : {
     name: humanize(finding.artifactId),
     authority: "",
+    description: "",
     category: "Unregistered artifact",
   };
   const elementsTotal = artifact?.elements?.length ?? 0;
@@ -56,6 +58,7 @@ export function FindingCard({ finding }: { finding: Finding }) {
       </div>
       <h4>{meta.name}</h4>
       <p className={styles.findingText}>{meta.authority}</p>
+      {meta.description ? <p className={styles.findingText}>{meta.description}</p> : null}
 
       {finding.elementsPresent && elementsTotal > 0 ? (
         <div
