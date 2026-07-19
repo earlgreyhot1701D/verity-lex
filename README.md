@@ -195,6 +195,7 @@ Honest list, current as of submission:
 - An empty model reply surfaces as a caught scan failure rather than a friendlier partial state.
 - One court, one registry version. The registry is versioned (`registry.v1.json`) precisely so coverage can grow without breaking old audits.
 - A not-located finding means we could not locate public evidence. It does not mean the artifact does not exist. This is a feature, but it bears repeating.
+- The Content-Security-Policy header ships report-only in v1: violations are logged, nothing is blocked. Enforcing it requires per-request script nonces, which is v2 work.
 
 ## License
 
