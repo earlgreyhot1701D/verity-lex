@@ -3,10 +3,13 @@
 import { cachedSantaBarbaraScan } from "../../../data/mockScan.ts";
 import registryData from "../../../data/registry.v1.json" with { type: "json" };
 import { runAgentLoop } from "../../../lib/agent/controller.ts";
+import { logFailure } from "../../../lib/failureLog.ts";
 import { createOpenAIModelClient, createStubModelClient } from "../../../lib/model/openai.ts";
 import { createRateLimiter } from "../../../lib/rateLimit.ts";
 import { evaluate, type Registry } from "../../../lib/ruleEngine/evaluate.ts";
 import { validateScanInput } from "../../../lib/validate.ts";
+
+export const maxDuration = 60;
 
 const registry = registryData as Registry;
 const scanLimiter = createRateLimiter({ limit: 5, windowMs: 60_000 });
@@ -69,7 +72,8 @@ export async function POST(request: Request): Promise<Response> {
       },
     });
     return Response.json(result);
-  } catch {
+  } catch (error) {
+    logFailure("api/scan", error, { path: "POST /api/scan" });
     return errorResponse(500, "SCAN_FAILED", "The public-record scan could not be completed.");
   }
 }
