@@ -74,6 +74,7 @@ export function SurfaceAct({ scan, findings, score }: SurfaceActProps) {
             Computed by the rule engine, not the model. Weights are published.
             Recompute it yourself.
           </p>
+          <a className={`${styles.scoreCaption} ${styles.mono}`} href="/methods">Methods · every weight published</a>
           <AuditDownload scan={scan} />
         </div>
 
