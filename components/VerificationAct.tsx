@@ -14,7 +14,7 @@ interface VerificationActProps {
 interface RegistryArtifact {
   id: string;
   name: string;
-  authority: { citation: string };
+  authority: { name: string };
 }
 
 const artifacts = (registryData as { artifacts: RegistryArtifact[] }).artifacts;
@@ -22,9 +22,9 @@ const artifacts = (registryData as { artifacts: RegistryArtifact[] }).artifacts;
 const humanize = (id: string) =>
   id.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 
-const draftFor = (name: string, citation: string) => `To the Records Access Officer:
+const draftFor = (name: string, authorityName: string) => `To the Records Access Officer:
 
-Pursuant to ${citation}, please identify any publicly available index, policy, or inventory concerning the court's ${name} in effect as of the date of this request.
+Pursuant to ${authorityName}, please identify any publicly available index, policy, or inventory concerning the court's ${name} in effect as of the date of this request.
 
 Please include the adoption date and approving authority.`;
 
@@ -55,7 +55,7 @@ export function VerificationAct({ findings }: VerificationActProps) {
           {queued.length > 0 ? queued.map((finding, index) => {
             const artifact = artifacts.find((item) => item.id === finding.artifactId);
             const name = artifact?.name ?? humanize(finding.artifactId);
-            const citation = artifact?.authority.citation ?? "the applicable public-records authority";
+            const authorityName = artifact?.authority.name ?? "the applicable public-records authority";
             const isOpen = Boolean(open[finding.artifactId]);
             return (
               <Fragment key={finding.artifactId}>
@@ -89,7 +89,7 @@ export function VerificationAct({ findings }: VerificationActProps) {
                   <span className={styles.draftLabel}>
                     Draft public inquiry · human review required
                   </span>
-                  <p className={styles.draftBody}>{draftFor(name, citation)}</p>
+                  <p className={styles.draftBody}>{draftFor(name, authorityName)}</p>
                 </article>
               </Fragment>
             );
