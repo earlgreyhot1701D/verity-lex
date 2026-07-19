@@ -169,14 +169,18 @@ The rule for all of these: stub, do not half-build. Each lands as an isolated mo
 
 ## How this was built with Codex
 
-This project was built in a creative-director workflow: a human sets architecture and acceptance criteria, AI agents generate, and nothing merges unverified.
+This project was built with Codex in the VS Code IDE using a creative-director workflow: a human sets the product vision, architecture, design, guardrails, and acceptance criteria; Codex implements the scoped engineering work; and nothing merges unverified.
 
 - **Codex built the code.** Every block (rule engine, tools, agent loop, API wiring, hardening, CI, add-ons) was implemented by Codex from gated, block-scoped prompts with explicit guardrails ("propose a file plan first", "do not refactor unrelated code", "stop after the PR").
 - **GPT-5.6 runs in the product.** It directs the discovery loop and performs schema-constrained extraction. It is barred, architecturally, from scoring.
-- **Every Codex change entered through a pull request**, was independently re-run and verified (tests, types, build) before merge, and CI now enforces that automatically. The commit history is the collaboration log: eight PRs, each one block.
+- **Every substantive Codex change entered through a pull request**, was independently re-run and verified (tests, types, build) before merge, and CI now enforces that automatically. The commit history is the collaboration log: nine scoped PRs covering the core blocks, add-ons, and release preparation.
 - Codex also caught and fixed real issues along the way (a `next/server` import trap avoided by using web-standard `Response.json`, a CI lockfile regeneration for the Linux runner), and its proposals were sometimes overruled by human review, which is the point of the gate.
 
-**Codex Session ID:** `PASTE-SESSION-ID-HERE` (from `/feedback` in the session where the core blocks were built)
+**Codex Session ID:** `019f77cd-ca05-71d0-a99a-4f53da2524fd`
+
+**Contribution estimate:** Codex produced approximately 85–90% of the implemented code and engineering work, or approximately 65–75% of the overall project when the human-authored product concept, specifications, architecture, design direction, written content, visual assets, review decisions, and approvals are included.
+
+The Codex implementation work included the deterministic rule engine and fixtures; Tavily-backed discovery, fetch, and extraction tools; the bounded model-directed agent loop and self-checks; stub and OpenAI SDK model clients; cached Santa Barbara scan; scan API and client wiring; shared validation; structured error handling; rate limiting; Docker production build; automated tests and GitHub Actions CI; recomputable audit export; published methods page; model-tier pinning; environment cleanup; documentation and MIT license integration; and favicon, hero, architecture, and social-card wiring. The initial product direction, UI foundation, editorial design, requirements, registry policy, branding, and final review remained human-led.
 
 ### Built in-window
 
