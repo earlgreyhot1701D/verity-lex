@@ -44,10 +44,11 @@ export function ScanAct({ institution, targetDomain, onObserve }: ScanActProps) 
             <span className={styles.serifItalic}>on the record.</span>
           </h1>
           <p className={styles.lede}>
-            <span className={styles.dropCap}>P</span>ublic institutions are told to use AI
-            with no way to know if they are ready. Verity Lex reads a court&apos;s
-            public record and shows what the evidence supports, what cannot be seen from
-            outside, and cites every claim to its source.
+            <span className={styles.dropCap}>C</span>ourt leaders are being told to adopt
+            AI, and sold it, with no way to know if they are ready. Verity Lex reads your
+            court&apos;s public record and shows what the evidence supports, what cannot be
+            seen from outside, and what to do about the gaps. Every claim cited. Recompute
+            the math yourself.
           </p>
           <dl className={styles.attributes}>
             <div>
@@ -95,6 +96,10 @@ export function ScanAct({ institution, targetDomain, onObserve }: ScanActProps) 
           </div>
           <p className={`${styles.finePrint} ${styles.mono}`}>
             NO LOGIN · PUBLIC DATA ONLY · EVERY CLAIM CITED
+          </p>
+          <p className={`${styles.finePrint} ${styles.mono}`}>
+            SEE WHAT THE RECORD SHOWS · SEE WHAT IT CAN&apos;T · GET THE DRAFT INQUIRY THAT
+            CLOSES THE GAP
           </p>
         </form>
       </section>
