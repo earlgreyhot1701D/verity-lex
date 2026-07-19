@@ -35,8 +35,20 @@ export function ScanAct({ onObserve, onLoadSample }: ScanActProps) {
           <a href="/methods">Method</a>
           <a href="/methods#methods-title">Rubric</a>
           <a href="/#observation">Field Notes</a>
-          <a href="https://earlgreyhot1701d.github.io/Clew-Labs/">About</a>
-          <a href="https://www.linkedin.com/in/la-shara-cordero-a0017a11/">LinkedIn</a>
+          <a
+            href="https://earlgreyhot1701d.github.io/Clew-Labs/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            About
+          </a>
+          <a
+            href="https://www.linkedin.com/in/la-shara-cordero-a0017a11/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            LinkedIn
+          </a>
         </div>
       </nav>
 
@@ -50,7 +62,7 @@ export function ScanAct({ onObserve, onLoadSample }: ScanActProps) {
           </h1>
           <p className={styles.lede}>
             <span className={styles.dropCap}>C</span>ourt leaders are being told to adopt
-            AI, and sold it, with no way to know if they are ready. Verity Lex reads your
+            AI with no way to know if they are ready. Verity Lex reads your
             court&apos;s public record and shows what the evidence supports, what cannot be
             seen from outside, and what to do about the gaps. Every claim cited. Recompute
             the math yourself.
