@@ -35,10 +35,12 @@ export function createOpenAIModelClient(): ModelClient {
   return {
     async complete(request) {
       try {
+        // OpenAI's json_object mode requires the word "json" in the input; instructions alone do not satisfy the check.
+        const input = request.responseFormat === "json" ? `Return JSON.\n${request.input}` : request.input;
         const response = await client.responses.create({
           model: "gpt-5.6-terra",
           instructions: request.system,
-          input: request.input,
+          input,
           text: request.responseFormat === "json" ? { format: { type: "json_object" } } : undefined,
         });
         return response.output_text;
