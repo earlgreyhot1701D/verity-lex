@@ -2,9 +2,11 @@
 
 import type { Finding, ScanResult } from "@/lib/types";
 import styles from "@/styles/readiness-register.module.css";
+import { AuditDownload } from "@/components/AuditDownload";
 import { FindingCard } from "@/components/FindingCard";
 
 interface SurfaceActProps {
+  scan: ScanResult;
   findings: Finding[];
   score: ScanResult["score"];
 }
@@ -15,7 +17,7 @@ const DIMENSIONS = {
   C: { label: "C · CAPACITY", max: 30, fill: "var(--sage)" },
 } as const;
 
-export function SurfaceAct({ findings, score }: SurfaceActProps) {
+export function SurfaceAct({ scan, findings, score }: SurfaceActProps) {
   const shown = findings.filter(
     (finding) => finding.status === "found" || finding.status === "verified",
   );
@@ -72,6 +74,7 @@ export function SurfaceAct({ findings, score }: SurfaceActProps) {
             Computed by the rule engine, not the model. Weights are published.
             Recompute it yourself.
           </p>
+          <AuditDownload scan={scan} />
         </div>
 
         <div className={styles.findings}>
