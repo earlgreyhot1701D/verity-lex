@@ -9,19 +9,19 @@ import { SurfaceAct } from "@/components/SurfaceAct";
 import { VerificationAct } from "@/components/VerificationAct";
 import { cachedSantaBarbaraScan } from "@/data/mockScan";
 import type { ScanResult } from "@/lib/types";
+import { validateScanInput } from "@/lib/validate";
 import { useState } from "react";
 
 const SANTA_BARBARA_DOMAIN = "santabarbara.courts.ca.gov";
-const DOMAIN_PATTERN = /^(?=.{1,253}$)(?:[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?\.)+[a-z](?:[a-z\d-]{0,61}[a-z\d])?$/i;
 
 export default function Home() {
   const [scan, setScan] = useState<ScanResult>(cachedSantaBarbaraScan);
   const [error, setError] = useState("");
 
   const observe = async (institution: string, targetDomain: string) => {
-    const validationError = validateInputs(institution, targetDomain);
-    if (validationError) {
-      setError(validationError);
+    const validated = validateScanInput(institution, targetDomain);
+    if (!validated.ok) {
+      setError(validated.error);
       return;
     }
 
@@ -30,7 +30,7 @@ export default function Home() {
       const response = await fetch("/api/scan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ institution: institution.trim(), targetDomain: targetDomain.trim() }),
+        body: JSON.stringify(validated.value),
       });
       const body = (await response.json()) as ScanResult | { error?: { message?: string } };
       if (!response.ok || !("findings" in body)) {
@@ -52,14 +52,4 @@ export default function Home() {
       <VerificationAct findings={scan.findings} />
     </main>
   );
-}
-
-function validateInputs(institution: string, targetDomain: string): string {
-  if (institution.trim().length === 0) {
-    return "Enter an institution before observing its public record.";
-  }
-  if (!DOMAIN_PATTERN.test(targetDomain.trim())) {
-    return "Enter a valid target domain without a protocol or path.";
-  }
-  return "";
 }

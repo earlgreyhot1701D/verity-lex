@@ -1,4 +1,6 @@
-/** Server-only model adapter contract for GPT-5.6 reasoning calls; Block 2 defaults to a stub so no live model can score or fetch. */
+/** Server-only GPT-5.6 Responses API adapter; callers retain a keyless stub fallback. */
+
+import OpenAI from "openai";
 
 export interface ModelRequest {
   system: string;
@@ -28,28 +30,17 @@ export function createOpenAIModelClient(): ModelClient {
     throw new Error("OPENAI_API_KEY is required for live model calls");
   }
 
+  const client = new OpenAI({ apiKey });
+
   return {
     async complete(request) {
-      const response = await fetch("https://api.openai.com/v1/responses", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "gpt-5.6",
-          instructions: request.system,
-          input: request.input,
-          text: request.responseFormat === "json" ? { format: { type: "json_object" } } : undefined,
-        }),
+      const response = await client.responses.create({
+        model: "gpt-5.6",
+        instructions: request.system,
+        input: request.input,
+        text: request.responseFormat === "json" ? { format: { type: "json_object" } } : undefined,
       });
-
-      if (!response.ok) {
-        throw new Error(`OpenAI response failed: ${response.status}`);
-      }
-
-      const payload = (await response.json()) as { output_text?: string };
-      return payload.output_text ?? "";
+      return response.output_text;
     },
   };
 }

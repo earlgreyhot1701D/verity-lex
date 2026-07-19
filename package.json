@@ -16,10 +16,12 @@
     "test:rule-engine": "node --experimental-strip-types lib/ruleEngine/evaluate.test.mjs",
     "test:agent-tools": "node --experimental-strip-types lib/agent/tools/tools.test.mjs",
     "test:agent-loop": "node --experimental-strip-types --experimental-specifier-resolution=node lib/agent/controller.test.mjs",
-    "test:scan-route": "node --experimental-strip-types --experimental-specifier-resolution=node app/api/scan/route.test.mjs"
+    "test:scan-route": "node --experimental-strip-types --experimental-specifier-resolution=node app/api/scan/route.test.mjs",
+    "test:hardening": "node --experimental-strip-types --test lib/validate.test.mjs lib/rateLimit.test.mjs"
   },
   "dependencies": {
     "next": "16.2.6",
+    "openai": "6.48.0",
     "react": "19.2.6",
     "react-dom": "19.2.6"
   },
@@ -32,5 +34,8 @@
     "eslint-config-next": "16.2.6",
     "tailwindcss": "4.2.1",
     "typescript": "5.9.3"
+  },
+  "overrides": {
+    "postcss": "8.5.19"
   }
 }

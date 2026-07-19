@@ -1,0 +1,8 @@
+# Keep secrets, local state, and build artifacts outside the Docker context.
+.git
+.next
+node_modules
+npm-debug.log*
+.env*
+!.env.example
+tsconfig.tsbuildinfo
