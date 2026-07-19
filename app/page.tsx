@@ -13,7 +13,7 @@ import { validateScanInput } from "@/lib/validate";
 import { useState } from "react";
 
 export default function Home() {
-  const [scan, setScan] = useState<ScanResult>(cachedSantaBarbaraScan);
+  const [scan, setScan] = useState<ScanResult | null>(null);
   const [error, setError] = useState("");
   const [phase, setPhase] = useState<"idle" | "observing" | "done">("idle");
   const [scanFormKey, setScanFormKey] = useState(0);
@@ -25,7 +25,7 @@ export default function Home() {
       return;
     }
 
-    const hadPreviousResult = phase === "done";
+    const hadPreviousResult = phase === "done" && scan !== null;
     setError("");
     setPhase("observing");
     try {
@@ -47,24 +47,30 @@ export default function Home() {
   };
 
   const clearResults = () => {
-    setScan(cachedSantaBarbaraScan);
+    setScan(null);
     setPhase("idle");
     setError("");
     setScanFormKey((current) => current + 1);
   };
 
+  const loadSample = () => {
+    setScan(cachedSantaBarbaraScan);
+    setPhase("done");
+    setError("");
+  };
+
   return (
     <main>
-      <ScanAct key={scanFormKey} onObserve={observe} />
+      <ScanAct key={scanFormKey} onObserve={observe} onLoadSample={loadSample} />
       {error ? <p role="alert">{error}</p> : null}
       <MarqueeTicker />
       <ObservationAct
-        runLog={phase === "done" ? scan.runLog : []}
+        runLog={phase === "done" && scan ? scan.runLog : []}
         phase={phase}
         onClear={clearResults}
       />
-      <SurfaceAct scan={scan} findings={scan.findings} score={scan.score} />
-      <VerificationAct findings={scan.findings} />
+      <SurfaceAct scan={scan} findings={scan?.findings ?? []} score={scan?.score ?? null} />
+      <VerificationAct findings={scan?.findings ?? []} />
     </main>
   );
 }
