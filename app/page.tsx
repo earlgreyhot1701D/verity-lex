@@ -48,7 +48,7 @@ export default function Home() {
       {error ? <p role="alert">{error}</p> : null}
       <MarqueeTicker />
       <ObservationAct runLog={scan.runLog} />
-      <SurfaceAct findings={scan.findings} score={scan.score} />
+      <SurfaceAct scan={scan} findings={scan.findings} score={scan.score} />
       <VerificationAct findings={scan.findings} />
     </main>
   );
