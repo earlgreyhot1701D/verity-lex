@@ -2,22 +2,34 @@
 
 "use client";
 
-import { useState } from "react";
+import registryData from "@/data/registry.v1.json";
 import type { Finding } from "@/lib/types";
 import styles from "@/styles/readiness-register.module.css";
+import { Fragment, useState } from "react";
 
 interface VerificationActProps {
   findings: Finding[];
 }
 
-const DRAFT = `To the Records Access Officer:
+interface RegistryArtifact {
+  id: string;
+  name: string;
+  authority: { citation: string };
+}
 
-Pursuant to California Rule of Court 10.500, please identify any publicly available index, policy, or inventory concerning the court's use of generative artificial intelligence in effect as of the date of this request.
+const artifacts = (registryData as { artifacts: RegistryArtifact[] }).artifacts;
+
+const humanize = (id: string) =>
+  id.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+const draftFor = (name: string, citation: string) => `To the Records Access Officer:
+
+Pursuant to ${citation}, please identify any publicly available index, policy, or inventory concerning the court's ${name} in effect as of the date of this request.
 
 Please include the adoption date and approving authority.`;
 
 export function VerificationAct({ findings }: VerificationActProps) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState<Record<string, boolean>>({});
   const queued = findings.filter((finding) => finding.status === "not_located");
 
   return (
@@ -40,38 +52,52 @@ export function VerificationAct({ findings }: VerificationActProps) {
         </p>
 
         <div className={styles.vgrid}>
-          <article className={styles.queueCard}>
-            <span className={styles.queueLabel}>
-              Queue 01 · Public confirmation
-            </span>
-            <h4>Rule 10.500 Access Process</h4>
-            <p className={styles.queueText}>
-              No responsive public index was located
-              {queued.length > 1
-                ? ` (1 of ${queued.length} items in the queue).`
-                : "."}{" "}
-              The record may exist outside the pages reviewed.
-            </p>
-            <button
-              className={styles.queueButton}
-              type="button"
-              aria-expanded={open}
-              onClick={() => setOpen((value) => !value)}
-            >
-              {open ? "HIDE DRAFT" : "REVEAL DRAFT"}
-              <span aria-hidden="true">{open ? "−" : "+"}</span>
-            </button>
-          </article>
+          {queued.length > 0 ? queued.map((finding, index) => {
+            const artifact = artifacts.find((item) => item.id === finding.artifactId);
+            const name = artifact?.name ?? humanize(finding.artifactId);
+            const citation = artifact?.authority.citation ?? "the applicable public-records authority";
+            const isOpen = Boolean(open[finding.artifactId]);
+            return (
+              <Fragment key={finding.artifactId}>
+                <article className={styles.queueCard}>
+                  <span className={styles.queueLabel}>
+                    Queue {String(index + 1).padStart(2, "0")} · Public confirmation
+                  </span>
+                  <h4>{name}</h4>
+                  <p className={styles.queueText}>
+                    No responsive public index was located. The record may exist outside
+                    the pages reviewed.
+                  </p>
+                  <button
+                    className={styles.queueButton}
+                    type="button"
+                    aria-expanded={isOpen}
+                    onClick={() => setOpen((current) => ({
+                      ...current,
+                      [finding.artifactId]: !current[finding.artifactId],
+                    }))}
+                  >
+                    {isOpen ? "HIDE DRAFT" : "REVEAL DRAFT"}
+                    <span aria-hidden="true">{isOpen ? "−" : "+"}</span>
+                  </button>
+                </article>
 
-          <article
-            className={`${styles.draftCard} ${open ? styles.draftOpen : ""}`}
-            aria-hidden={!open}
-          >
-            <span className={styles.draftLabel}>
-              Draft public inquiry · human review required
-            </span>
-            <p className={styles.draftBody}>{DRAFT}</p>
-          </article>
+                <article
+                  className={`${styles.draftCard} ${isOpen ? styles.draftOpen : ""}`}
+                  aria-hidden={!isOpen}
+                >
+                  <span className={styles.draftLabel}>
+                    Draft public inquiry · human review required
+                  </span>
+                  <p className={styles.draftBody}>{draftFor(name, citation)}</p>
+                </article>
+              </Fragment>
+            );
+          }) : (
+            <p className={`${styles.queueLabel} ${styles.mono}`}>
+              NOTHING IN QUEUE · ALL ARTIFACTS LOCATED OR VERIFIED
+            </p>
+          )}
         </div>
 
         <div className={styles.legend}>

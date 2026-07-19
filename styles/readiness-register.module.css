@@ -586,7 +586,8 @@
   padding: 4px 8px;
   border: 1px solid var(--orange);
   border-radius: 3px;
-  color: var(--orange);
+  background: var(--orange);
+  color: var(--cream);
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.625rem;
   font-weight: 600;
@@ -597,7 +598,8 @@
 
 .badgeNot {
   border-color: var(--muted);
-  color: var(--muted);
+  background: var(--muted);
+  color: var(--cream);
 }
 
 .badgeVer {
