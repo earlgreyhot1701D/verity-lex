@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify lockfile is in sync
+        run: |
+          npm install --package-lock-only
+          if ! git diff --quiet package-lock.json; then
+            echo "::error::package-lock.json is out of sync with package.json. Run 'npm install' locally and commit the updated package-lock.json."
+            git --no-pager diff --stat package-lock.json
+            exit 1
+          fi
+
+      - name: Run self-check
+        run: npm run selfcheck
+
+      - name: Test rule engine
+        run: npm run test:rule-engine
+
+      - name: Test agent tools
+        run: npm run test:agent-tools
+
+      - name: Test agent loop
+        run: npm run test:agent-loop
+
+      - name: Test scan route
+        run: npm run test:scan-route
+
+      - name: Test hardening
+        run: npm run test:hardening
+
+      - name: Type-check
+        run: npx tsc --noEmit
+
+      - name: Build production app
+        run: npm run build
+
+      - name: Audit high-severity vulnerabilities
+        continue-on-error: true
+        run: npm audit --audit-level=high
