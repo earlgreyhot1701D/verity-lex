@@ -11,13 +11,15 @@ Built for California superior courts. Registry v1.0 scores against California au
 Built for OpenAI Build Week 2026 (Work and Productivity track) with Codex and GPT-5.6.
 AI assisted. Human approved.
 
+[Live demo](https://verity-lex.vercel.app) · [Methods](https://verity-lex.vercel.app/methods) · [Demo video](VIDEO-URL-PENDING)
+
 ---
 
 ## The problem
 
 The way technology gets sold to government is backwards. Vendors arrive with solutions and go looking for problems, without understanding the institution they are selling into: what standards it is held to, whether it is meeting them, whether its structure and its people are ready for what is being sold. The result is familiar to anyone who has worked in the public sector: shelfware, failed rollouts, and eroded trust.
 
-AI is about to repeat this at scale. Courts and other public institutions are adopting AI right now, under real mandates. In California, Rule of Court 10.430 requires courts that permit generative AI to adopt a use policy. But nobody can currently answer the foundational question: **what does an institution's own public record say about its readiness?**
+AI is about to repeat this at scale. Courts and other public institutions are adopting AI right now, under real mandates. In California, Rule of Court 10.430 requires courts that permit generative AI to adopt a use policy. But there is no fast, checkable way to answer the foundational question: **what does an institution's own public record say about its readiness?**
 
 The tools that exist are either consulting engagements (slow, expensive, opaque) or an LLM chat answer (fast, unverifiable, and different every time you ask). A government buyer cannot procure "an LLM felt good about our compliance." They need a number they can recompute, findings they can check, and sources they can click.
 
@@ -95,9 +97,10 @@ Key properties, each enforced in code and covered by a test:
 - **The model never assigns the score.** `evaluate.ts` imports no model. The agent-loop test asserts the score comes only from the injected pure evaluator.
 - **No found without a source.** A finding without a source is downgraded to not located.
 - **Never assert absence.** Statuses are `found`, `not_located` (provisional), or `verified` (human-confirmed only).
-- **Prompt-injection defense at the boundary.** Fetched document text is wrapped in `<UNTRUSTED_DOCUMENT_TEXT>` tags at fetch time; the extractor's system prompt instructs the model to treat everything inside as data, never instructions. The action-planning call never sees document text at all, only URLs, so a poisoned document cannot steer the loop.
+- **Prompt-injection risk reduction at the retrieval boundary.** Fetched document text is wrapped in `<UNTRUSTED_DOCUMENT_TEXT>` tags at fetch time; the extractor's system prompt instructs the model to treat everything inside as data, never instructions. The planner sees URLs and tool outcomes only, never document text.
 - **Bounded autonomy.** Max 8 iterations, max 5 fetches, 10 second timeouts, all asserted by tests that prove the bounds actually trip.
-- **Fails safe.** No API key means the app runs on a stubbed model and a pre-cached scan. Errors surface as structured JSON and visible UI states, never blank screens.
+- **Dead ends are bounded twice.** The planner is shown per-URL extraction failures, and code caps extraction retries at two per URL regardless of what the model chooses.
+- **Fails safe.** No API key means the app runs on a stubbed model; the cached Santa Barbara sample remains available as an explicit, labeled option. Errors surface as structured JSON and visible UI states, never blank screens.
 - **Stateless.** No database. Nothing about a scanned institution is stored.
 
 ## Quickstart
@@ -109,7 +112,7 @@ npm ci
 npm run dev
 ```
 
-Open http://localhost:3000. With no keys set, you get the full experience against a pre-cached Santa Barbara scan and a stubbed model. That is deliberate: the demo cannot break on stage.
+Open http://localhost:3000. The page opens empty on purpose: no scan data appears until you run one or explicitly load the labeled sample (LOAD SAMPLE SCAN · SANTA BARBARA · CACHED). With no keys set, scans run against a stubbed model and return an honest empty surface; the cached sample is always available for a keyless demo.
 
 To run live scans, copy `.env.example` to `.env.local` and set:
 
@@ -133,7 +136,7 @@ The container exposes the app at http://localhost:3000.
 
 ### Sample data
 
-- `data/mockScan.ts` is the pre-cached Santa Barbara `ScanResult` the app serves by default
+- `data/mockScan.ts` is the pre-cached Santa Barbara `ScanResult`, available in the UI as the labeled sample scan
 - `data/registry.v1.json` is the scoring registry: 9 artifacts, weights, tiers, legal authorities
 - `data/rule-engine.fixtures.json` holds the fixture cases the rule engine must pass exactly
 - `data/extraction.schema.json` is the JSON contract the extractor must satisfy
@@ -152,7 +155,7 @@ npx tsc --noEmit
 npm run build
 ```
 
-CI runs all of the above on every pull request and push to main, plus a lockfile drift guard and a non-blocking `npm audit`. Every feature in this repo entered through a reviewed, CI-green pull request.
+CI runs all of the above on every pull request and push to main, plus a lockfile drift guard and a non-blocking `npm audit`. Every feature in this repo entered through a pull request, manually reviewed by the project author before merge, with CI green.
 
 The audit test is the thesis in miniature: it takes a generated audit bundle and recomputes the score by hand from only the bundle's own findings and weights, then asserts it matches the engine. If the bundle ever stops carrying enough information to check our math, the build fails.
 
@@ -174,7 +177,7 @@ The rule for all of these: stub, do not half-build. Each lands as an isolated mo
 
 ## Design decisions
 
-- **Model: `gpt-5.6-terra`, pinned 2026-07-19.** Chosen over Sol because structured extraction showed no visible quality gain at roughly twice the input cost, and over Luna because legal-document extraction benefits from quality headroom. The model only reads and extracts; it never assigns the score, so tier choice affects extraction quality and cost, not scoring.
+- **Model: `gpt-5.6-terra`, selected and verified July 19, 2026.** Chosen over Sol because structured extraction showed no visible quality gain at roughly twice the input cost, and over Luna because legal-document extraction benefits from quality headroom. The model only reads and extracts; it never assigns the score, so tier choice affects extraction quality and cost, not scoring.
 - **Retrieval via Tavily** rather than raw fetch: court sites are frequently JavaScript apps that return an empty shell to a plain HTTP fetch. Tavily /extract reads them. Provenance still cites the court's real URL, never Tavily.
 - **Mock-first, then live.** The UI, agent, and API were all built and tested against fixtures and a stubbed model before a real key was ever wired. A live model was never attached to a broken layout.
 - **One file, one responsibility**, enforced by a guardrail script that fails the build past roughly 200 lines or five exports.
