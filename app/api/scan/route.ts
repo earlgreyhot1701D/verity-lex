@@ -3,16 +3,13 @@
 import { cachedSantaBarbaraScan } from "../../../data/mockScan.ts";
 import registryData from "../../../data/registry.v1.json" with { type: "json" };
 import { runAgentLoop } from "../../../lib/agent/controller.ts";
-import { createStubModelClient } from "../../../lib/model/openai.ts";
+import { createOpenAIModelClient, createStubModelClient } from "../../../lib/model/openai.ts";
+import { createRateLimiter } from "../../../lib/rateLimit.ts";
 import { evaluate, type Registry } from "../../../lib/ruleEngine/evaluate.ts";
+import { validateScanInput } from "../../../lib/validate.ts";
 
-const DOMAIN_PATTERN = /^(?=.{1,253}$)(?:[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?\.)+[a-z](?:[a-z\d-]{0,61}[a-z\d])?$/i;
 const registry = registryData as Registry;
-
-interface ScanInput {
-  institution: string;
-  targetDomain: string;
-}
+const scanLimiter = createRateLimiter({ limit: 5, windowMs: 60_000 });
 
 interface ApiError {
   error: { code: string; message: string };
@@ -23,6 +20,14 @@ export async function GET(): Promise<Response> {
 }
 
 export async function POST(request: Request): Promise<Response> {
+  const rateLimit = scanLimiter.check(clientIp(request));
+  if (!rateLimit.allowed) {
+    return Response.json(apiError("RATE_LIMITED", "Too many scan requests. Please try again shortly."), {
+      status: 429,
+      headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
+    });
+  }
+
   let body: unknown;
   try {
     body = await request.json();
@@ -30,15 +35,20 @@ export async function POST(request: Request): Promise<Response> {
     return errorResponse(400, "INVALID_JSON", "Request body must be valid JSON.");
   }
 
-  const validated = validateInput(body);
-  if ("error" in validated) {
-    return Response.json(validated, { status: 400 });
+  if (!isRecord(body)) {
+    return errorResponse(400, "INVALID_INPUT", "Request body must contain scan inputs.");
+  }
+  const validated = validateScanInput(body.institution, body.targetDomain);
+  if (!validated.ok) {
+    return errorResponse(400, "INVALID_INPUT", validated.error);
   }
 
   try {
-    const model = createStubModelClient();
+    const model = process.env.OPENAI_API_KEY?.trim()
+      ? createOpenAIModelClient()
+      : createStubModelClient();
     const result = await runAgentLoop({
-      ...validated,
+      ...validated.value,
       registry,
       model,
       limits: { maxIterations: 8, maxFetches: 5, timeoutMs: 10_000 },
@@ -64,21 +74,14 @@ export async function POST(request: Request): Promise<Response> {
   }
 }
 
-function validateInput(value: unknown): ScanInput | ApiError {
-  if (!isRecord(value) || typeof value.institution !== "string" || value.institution.trim().length === 0) {
-    return apiError("INVALID_INPUT", "Institution must be a non-empty string.");
-  }
-  if (typeof value.targetDomain !== "string" || !DOMAIN_PATTERN.test(value.targetDomain.trim())) {
-    return apiError("INVALID_INPUT", "Target domain must be a valid hostname without a protocol or path.");
-  }
-  return {
-    institution: value.institution.trim(),
-    targetDomain: value.targetDomain.trim().toLowerCase(),
-  };
-}
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function clientIp(request: Request): string {
+  return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+    || request.headers.get("x-real-ip")?.trim()
+    || "unknown";
 }
 
 function apiError(code: string, message: string): ApiError {
