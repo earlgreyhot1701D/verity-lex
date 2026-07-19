@@ -1,6 +1,8 @@
 # Verity Lex
 
-**Everyone is selling AI to government. Nobody has checked whether government is ready to buy.**
+![Verity Lex — AI readiness, observed](./public/images/hero.png)
+
+**Everyone is selling AI to government. Who has checked whether government is ready to buy?**
 
 Verity Lex starts at the foundation: what standards is a public institution held to, and what does its own public record show? It returns an AI-readiness score anyone can recompute. The AI reads the record. It never assigns the score.
 
@@ -58,6 +60,8 @@ This submission is deliberately a thin end-to-end wedge into tier one: one real 
 The v2 stubs below are the pyramid's next tiers, already shaped in the codebase: the training pathway module is tier three's first appearance, and the draft-inquiry gate is how tier-one findings become verified ones.
 
 ## Architecture
+
+![Verity Lex system architecture](./public/images/architecture.png)
 
 ```
 app/page.tsx (four-act editorial UI)
