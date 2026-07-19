@@ -15,7 +15,8 @@
     "selfcheck": "node scripts/check-godfiles.mjs && node scripts/preflight.mjs",
     "test:rule-engine": "node --experimental-strip-types lib/ruleEngine/evaluate.test.mjs",
     "test:agent-tools": "node --experimental-strip-types lib/agent/tools/tools.test.mjs",
-    "test:agent-loop": "node --experimental-strip-types --experimental-specifier-resolution=node lib/agent/controller.test.mjs"
+    "test:agent-loop": "node --experimental-strip-types --experimental-specifier-resolution=node lib/agent/controller.test.mjs",
+    "test:scan-route": "node --experimental-strip-types --experimental-specifier-resolution=node app/api/scan/route.test.mjs"
   },
   "dependencies": {
     "next": "16.2.6",

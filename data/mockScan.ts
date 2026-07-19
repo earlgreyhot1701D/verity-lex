@@ -1,10 +1,10 @@
-/** Supplies one typed public evidence scan for layout development without APIs. */
+/** Supplies the pre-cached Santa Barbara public-evidence scan for instant, demo-safe rendering. */
 
 import type { ScanResult } from "@/lib/types";
 
 const fetchedAt = "2026-07-18T14:00:00.000Z";
 
-export const mockScan: ScanResult = {
+export const cachedSantaBarbaraScan: ScanResult = {
   institution: "Santa Barbara Superior Court",
   state: "draft",
   findings: [
