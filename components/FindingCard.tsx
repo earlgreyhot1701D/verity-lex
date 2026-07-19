@@ -1,8 +1,11 @@
 /** One finding as a card: Found / Not-located / Verified, with citation and pips. */
 
+"use client";
+
 import registryData from "@/data/registry.v1.json";
 import type { Finding } from "@/lib/types";
 import styles from "@/styles/readiness-register.module.css";
+import { useState } from "react";
 
 interface RegistryArtifact {
   id: string;
@@ -20,6 +23,7 @@ const humanize = (id: string) =>
 const fileName = (url: string) => url.split("/").pop() || url;
 
 export function FindingCard({ finding }: { finding: Finding }) {
+  const [showFullPassage, setShowFullPassage] = useState(false);
   const artifact = artifacts.find((item) => item.id === finding.artifactId);
   const meta = artifact ? {
     name: artifact.name,
@@ -85,11 +89,22 @@ export function FindingCard({ finding }: { finding: Finding }) {
             {fileName(finding.source.url)}
           </span>
           {finding.source.quotedSpan ? (
-            <span className={styles.citationQuote}>
+            <span className={`${styles.citationQuote} ${showFullPassage ? styles.citationQuoteFull : ""}`}>
               {finding.source.quotedSpan}
             </span>
           ) : null}
         </a>
+      ) : null}
+
+      {finding.source?.quotedSpan ? (
+        <button
+          className={styles.quoteToggle}
+          type="button"
+          aria-expanded={showFullPassage}
+          onClick={() => setShowFullPassage((current) => !current)}
+        >
+          {showFullPassage ? "HIDE" : "SHOW FULL PASSAGE"}
+        </button>
       ) : null}
 
       {finding.note && finding.status !== "found" ? (

@@ -8,9 +8,10 @@ import styles from "@/styles/readiness-register.module.css";
 
 interface ScanActProps {
   onObserve: (institution: string, targetDomain: string) => void;
+  onLoadSample: () => void;
 }
 
-export function ScanAct({ onObserve }: ScanActProps) {
+export function ScanAct({ onObserve, onLoadSample }: ScanActProps) {
   const observe = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -89,7 +90,7 @@ export function ScanAct({ onObserve }: ScanActProps) {
             Public record scan. Deeper repository and staff readiness belong to a later
             tier.
           </p>
-          <p className={`${styles.finePrint} ${styles.mono}`}>
+          <p className={`${styles.finePrint} ${styles.mono} ${styles.courtScope}`}>
             CALIFORNIA SUPERIOR COURTS · REGISTRY V1.0 IS BUILT ON CALIFORNIA AUTHORITIES
           </p>
           <div className={styles.field}>
@@ -98,23 +99,37 @@ export function ScanAct({ onObserve }: ScanActProps) {
             </label>
             <select id="court-name" name="court" defaultValue="" required>
               <option value="" disabled>
-                SELECT A CALIFORNIA SUPERIOR COURT
+                SELECT A CALIFORNIA COURT
               </option>
               {californiaSuperiorCourts.map((court) => (
-                <option key={court.name} value={court.name} disabled={!court.live}>
-                  {court.name}{court.live ? "" : " · coming soon"}
+                <option
+                  className={court.live ? styles.liveCourt : undefined}
+                  key={court.name}
+                  value={court.name}
+                  disabled={!court.live}
+                >
+                  {court.name}{court.live ? " · LIVE" : " · coming soon"}
                 </option>
               ))}
             </select>
             <button type="submit">OBSERVE →</button>
           </div>
-          <p className={`${styles.finePrint} ${styles.mono}`}>
-            NO LOGIN · PUBLIC DATA ONLY · EVERY CLAIM CITED
-          </p>
-          <p className={`${styles.finePrint} ${styles.mono}`}>
-            SEE WHAT THE RECORD SHOWS · SEE WHAT IT CAN&apos;T · GET THE DRAFT INQUIRY THAT
-            CLOSES THE GAP
-          </p>
+          <button
+            className={`${styles.sampleControl} ${styles.mono}`}
+            type="button"
+            onClick={onLoadSample}
+          >
+            LOAD SAMPLE SCAN · SANTA BARBARA · CACHED JULY 18
+          </button>
+          <div className={styles.scanNotes}>
+            <p className={`${styles.finePrint} ${styles.mono}`}>
+              NO LOGIN · PUBLIC DATA ONLY · EVERY CLAIM CITED
+            </p>
+            <p className={`${styles.finePrint} ${styles.mono}`}>
+              SEE WHAT THE RECORD SHOWS · SEE WHAT IT CAN&apos;T · GET THE DRAFT INQUIRY THAT
+              CLOSES THE GAP
+            </p>
+          </div>
         </form>
       </section>
     </div>

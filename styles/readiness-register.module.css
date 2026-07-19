@@ -237,6 +237,20 @@
   color: var(--muted);
 }
 
+.field select {
+  width: 100%;
+  font-size: 0.78rem;
+  letter-spacing: 0.015em;
+}
+
+.field button {
+  flex: 0 0 auto;
+}
+
+.liveCourt {
+  font-weight: 700;
+}
+
 .field button {
   align-self: stretch;
   padding: 14px 18px;
@@ -264,6 +278,30 @@
 .finePrint {
   margin: 4px 0 0;
   color: var(--sage);
+}
+
+.courtScope {
+  margin-bottom: 10px;
+}
+
+.sampleControl {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--orange);
+  cursor: pointer;
+  text-align: left;
+}
+
+.scanNotes {
+  margin-top: 10px;
+  opacity: 0.78;
+}
+
+.scanNotes .finePrint {
+  margin-top: 2px;
+  font-size: 0.625rem;
+  letter-spacing: 0.1em;
 }
 
 .marquee {
@@ -730,13 +768,37 @@
 }
 
 .citationQuote {
-  display: block;
+  display: -webkit-box;
+  overflow: hidden;
   margin: 14px 0 0;
   color: var(--ink);
   font-family: "Playfair Display", serif;
   font-size: 1.05rem;
   font-style: italic;
   line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.citationQuoteFull {
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+}
+
+.quoteToggle {
+  margin-top: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--teal);
+  cursor: pointer;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.5625rem;
+  letter-spacing: 0.11em;
+  text-decoration: underline;
+  text-transform: uppercase;
+  text-underline-offset: 3px;
 }
 
 .citation:hover .citationTitle {
