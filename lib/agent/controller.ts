@@ -115,7 +115,7 @@ async function observeExtraction(
 
 async function nextAction(model: ModelClient, institution: string, discoveredUrls: string[], fetchedUrls: string[]): Promise<AgentAction> {
   const raw = await model.complete({
-    system: "Choose the next ReAct action as JSON: reason plus action discover, fetch, extract, or finish. Use only observed URLs.",
+    system: "You are directing a bounded public-record scan. Reply with ONE JSON object: {\"reason\": string, \"action\": \"discover\" | \"fetch\" | \"extract\" | \"finish\", \"query\": string, \"url\": string}. Rules: action discover REQUIRES query (a search phrase for one of the registry artifacts, e.g. generative AI use policy, records retention schedule, strategic plan, adopted budget, language access). action fetch REQUIRES url, chosen ONLY from discoveredUrls. action extract REQUIRES url, chosen ONLY from fetchedUrls. Omit unused fields. Choose finish when every artifact has been searched or evidence is exhausted.",
     input: JSON.stringify({ institution, discoveredUrls, fetchedUrls }),
     responseFormat: "json",
   });
