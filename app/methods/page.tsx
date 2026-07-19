@@ -16,7 +16,9 @@ export default function MethodsPage() {
         <div className={styles.scoreMeter}>
           <p className={styles.scoreCaption}>
             The score is computed by a deterministic rule engine from these published
-            weights; the model never assigns the score.
+            weights; the model never assigns the score. Registry v1.0 is built for
+            California superior courts; each artifact cites the California authority
+            that grounds it.
           </p>
         </div>
 

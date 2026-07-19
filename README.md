@@ -6,6 +6,8 @@
 
 Verity Lex starts at the foundation: what standards is a public institution held to, and what does its own public record show? It returns an AI-readiness score anyone can recompute. The AI reads the record. It never assigns the score.
 
+Built for California superior courts. Registry v1.0 scores against California authorities (Rule of Court 10.430, Gov. Code 68150, Rule of Court 10.500); other institution types are future registry versions.
+
 Built for OpenAI Build Week 2026 (Work and Productivity track) with Codex and GPT-5.6.
 AI assisted. Human approved.
 
@@ -207,6 +209,7 @@ Honest list, current as of submission:
 - One court, one registry version. The registry is versioned (`registry.v1.json`) precisely so coverage can grow without breaking old audits.
 - A not-located finding means we could not locate public evidence. It does not mean the artifact does not exist. This is a feature, but it bears repeating.
 - The Content-Security-Policy header ships report-only in v1: violations are logged, nothing is blocked. Enforcing it requires per-request script nonces, which is v2 work.
+- One state in v1: the scoring registry is California-specific by design. Scanning a non-California institution would score it against the wrong authorities, so the UI limits selection to California superior courts, and only courts with a human-verified official domain are selectable.
 
 ## License
 

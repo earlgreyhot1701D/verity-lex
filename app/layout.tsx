@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   metadataBase,
   title: "Verity Lex",
   description:
-    "Everyone is selling AI to government. Verity Lex reads a court's public record and returns an AI-readiness score anyone can recompute. The AI reads. It never scores.",
+    "Everyone is selling AI to government. Verity Lex reads a California court's public record and returns an AI-readiness score anyone can recompute. The AI reads. It never scores.",
   icons: {
     icon: "/images/favicon.png",
     apple: "/images/favicon.png",
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Verity Lex",
     description:
-      "Everyone is selling AI to government. Verity Lex reads a court's public record and returns an AI-readiness score anyone can recompute. The AI reads. It never scores.",
+      "Everyone is selling AI to government. Verity Lex reads a California court's public record and returns an AI-readiness score anyone can recompute. The AI reads. It never scores.",
     type: "website",
     images: [
       {
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Verity Lex",
     description:
-      "Everyone is selling AI to government. Verity Lex reads a court's public record and returns an AI-readiness score anyone can recompute. The AI reads. It never scores.",
+      "Everyone is selling AI to government. Verity Lex reads a California court's public record and returns an AI-readiness score anyone can recompute. The AI reads. It never scores.",
     images: ["/images/social-card.png"],
   },
   other: {
