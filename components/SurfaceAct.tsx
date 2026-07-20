@@ -76,6 +76,11 @@ export function SurfaceAct({ scan, findings, score }: SurfaceActProps) {
                 Computed by the rule engine, not the model. Weights are published.
                 Recompute it yourself.
               </p>
+              <p className={styles.scoreCaption}>
+                A draft evidence surface from one observation, not a verdict. Every finding
+                is cited; the weights are published. Re-run over time to build a baseline and
+                see when the record changes.
+              </p>
               <a className={`${styles.scoreCaption} ${styles.mono}`} href="/methods">
                 Methods · every weight published
               </a>
