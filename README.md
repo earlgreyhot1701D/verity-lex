@@ -215,6 +215,7 @@ The rule for all of these: stub, do not half-build. Each lands as an isolated mo
 - **Mock-first, then live.** The UI, agent, and API were all built and tested against fixtures and a stubbed model before a real key was ever wired. A live model was never attached to a broken layout.
 - **One file, one responsibility**, enforced by a guardrail script that fails the build past roughly 200 lines or five exports.
 - **Deterministic logic, AI reasoning.** Structure is code. Judgment about where to look is the model's. Judgment about the score is never the model's.
+- Artifact selection is grounded in published California authorities. The weights are Verity Lex methodology v1.0 and reflect our judgment; they invite expert validation, not just recomputation.
 
 ## How this was built with Codex
 
@@ -244,6 +245,8 @@ Honest list, current as of submission:
 - An empty model reply surfaces as a caught scan failure rather than a friendlier partial state.
 - A live scan is an independent, point-in-time observation. v1 is stateless, so it re-hunts from scratch each run and results can vary between scans. The scoring is deterministic and recomputable given the evidence a scan gathered; convergence across scans is v2 (memory). The cached sample is a frozen representative scan for stable review.
 - No confirmation intake in v1: a finding reaches `verified` only through out-of-band human confirmation (the tool drafts the inquiry, a human sends it, the court responds). v1 has no UI to record that response, so live scans produce only `found` and `not_located`.
+- The score reflects public evidence, not internal reality. A not-located artifact contributes zero, so a court with strong internal controls but sparse public documentation can score lower than one with polished docs and weaker practice. This is why the label reads 'draft public-evidence surface.' v2 will report supported, unresolved, and total points separately, so uncertainty is never silently counted as zero.
+- Registry v1.0 blends required legal duties, recommended practices, and aspirational framework alignment into one number. Each finding is tagged with its tier, but the summary combines them. v2 will separate compliance from maturity, because a legal duty and a nice-to-have are not the same thing.
 - One court, one registry version. The registry is versioned (`registry.v1.json`) precisely so coverage can grow without breaking old audits.
 - A not-located finding means we could not locate public evidence. It does not mean the artifact does not exist. This is a feature, but it bears repeating.
 - The Content-Security-Policy header ships report-only in v1: violations are logged, nothing is blocked. Enforcing it requires per-request script nonces, which is v2 work.

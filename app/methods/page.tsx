@@ -18,7 +18,9 @@ export default function MethodsPage() {
             The score is computed by a deterministic rule engine from these published
             weights; the model never assigns the score. Registry v1.0 is built for
             California superior courts; each artifact cites the California authority
-            that grounds it.
+            that grounds it. Artifact selection is grounded in published California
+            authorities. The weights are Verity Lex methodology v1.0 and reflect our
+            judgment; they invite expert validation, not just recomputation.
           </p>
         </div>
 
