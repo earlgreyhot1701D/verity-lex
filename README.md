@@ -68,7 +68,7 @@ Would you trust an AI to grade its own homework? Neither would a court. Most AI 
 | Reading documents | GPT-5.6 extracts signals to a strict JSON schema | Perception is what models are for |
 | Scoring readiness | Pure TypeScript rule engine | Judgment about the score must be reproducible, auditable, and identical on every run |
 
-Ask an LLM to score a court twice and you get two numbers. Verity Lex structurally cannot do that. The model has no path to the score. That constraint is the product.
+Ask an LLM to score a court twice on the same evidence and you get two numbers. Verity Lex structurally cannot: given the same evidence, the score is identical, every time. The model gathers and reads. It has no path to the score. That constraint is the product.
 
 ## The wedge today, the pyramid tomorrow
 
