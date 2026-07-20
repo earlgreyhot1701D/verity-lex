@@ -36,11 +36,27 @@ Every finding cites a real source URL and a quoted span. Anything not found is r
 The output is a readiness surface you can audit:
 
 - a score out of 100 across three dimensions (A: AI Governance, B: Data Foundations, C: Capacity)
-- every weight published on the [/methods](./app/methods/page.tsx) page
+- every weight published on the [/methods](https://verity-lex.vercel.app/methods) page
 - a downloadable **audit bundle** (findings, sources, weights, registry version) so you can recompute the score yourself
 - a run log showing every step the agent took and every guardrail that fired
 
 The score is a summary of one observation's cited evidence, not a verdict. Re-run it over time to build a baseline and see when the record changes.
+
+## Example: Santa Barbara Superior Court
+
+A live scan against registry v1.0:
+
+- Public-evidence surface: **59 / 100** (A · AI Governance 35/43, B · Data Foundations 9/27, C · Capacity 15/30)
+- Located and cited: **4 of 9** artifacts. Not located (provisional, not absent): **5 of 9**.
+
+Located, each with a real source and a quoted span:
+
+- **Generative AI Use Policy** (Cal. Rule of Court 10.430, required), **6 of 6** rule elements evidenced, cited to the court's [GenAI policy PDF](https://www.santabarbara.courts.ca.gov/system/files/general/genai-policy-12152025.pdf).
+- **Data security & privacy posture**, **Published strategic plan**, and **Language access services**, cited to the court's [strategic plan](https://www.santabarbara.courts.ca.gov/system/files/general/01-sb-sup-ct-strategic-plan-final-111224.pdf).
+
+Not located, each with a draft public-records inquiry ready for a human to send: judicial-officer GenAI guidance (Std. 10.80), records retention (Gov. Code 68150), public access process (Rule 10.500), a published technology plan (ITAC), and AI-governance framework alignment (NIST AI RMF).
+
+The number is recomputable: 35 + 9 + 15 = 59 from the published weights. Download the audit bundle and check it yourself. Because a live scan is an independent observation, re-running may surface a slightly different set; this is one representative run. A scan typically completes in under a minute and costs roughly $0.10 to $0.60 on gpt-5.6-terra, depending on how many documents it reads.
 
 ## Why this architecture: neurosymbolic on purpose
 
@@ -106,6 +122,15 @@ Key properties, each enforced in code and covered by a test:
 - **Dead ends are bounded twice.** The planner is shown per-URL extraction failures, and code caps extraction retries at two per URL regardless of what the model chooses.
 - **Fails safe.** No API key means the app runs on a stubbed model; the cached Santa Barbara sample remains available as an explicit, labeled option. Errors surface as structured JSON and visible UI states, never blank screens.
 - **Stateless.** No database. Nothing about a scanned institution is stored.
+
+## How it compares
+
+| | Fast | Cited to source | Published, recomputable score | Human-reviewable |
+|---|---|---|---|---|
+| Consulting assessment | No | Sometimes | Rarely (opaque method) | Yes |
+| General LLM answer | Yes | Inconsistently | No | Weakly |
+| Static checklist | Yes | No (no discovery) | Yes | Partly |
+| **Verity Lex** | Yes | Yes | Yes | Yes |
 
 ## Quickstart
 
