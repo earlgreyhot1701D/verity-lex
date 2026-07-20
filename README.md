@@ -19,13 +19,15 @@ AI assisted. Human approved.
 
 The way technology gets sold to government is backwards. Vendors arrive with solutions and go looking for problems, without understanding the institution they are selling into: what standards it is held to, whether it is meeting them, whether its structure and its people are ready for what is being sold. The result is familiar to anyone who has worked in the public sector: shelfware, failed rollouts, and eroded trust.
 
-AI is about to repeat this at scale. Courts and other public institutions are adopting AI right now, under real mandates. In California, Rule of Court 10.430 requires courts that permit generative AI to adopt a use policy. But there is no fast, checkable way to answer the foundational question: **what does an institution's own public record say about its readiness?**
+AI is about to repeat this at scale. Courts and other public institutions are adopting AI right now, under real mandates. In California, [Rule of Court 10.430](https://courts.ca.gov/cms/rules/index/ten/rule10_430) requires courts that permit generative AI to adopt a use policy. But there is no fast, checkable way to answer the foundational question: **what does an institution's own public record say about its readiness?**
 
 The tools that exist are either consulting engagements (slow, expensive, opaque) or an LLM chat answer (fast, unverifiable, and different every time you ask). A government buyer cannot procure "an LLM felt good about our compliance." They need a number they can recompute, findings they can check, and sources they can click.
 
 Verity Lex starts where selling to government should start: at the foundation, with the standards, before anyone pitches a solution.
 
 ## What Verity Lex does
+
+Verity Lex is operational readiness intelligence for public institutions. An analyst points it at an institution and gets back a cited, reviewable evidence surface: what the public record shows, what it can't see, and the gaps worth acting on.
 
 Give it a court and its official domain. An **agentic scan**, not a script: a model-directed ReAct loop (reason, act, observe, repeat) decides where to look next, searches the court's public record, fetches documents, and extracts evidence signals, all under bounded autonomy with every step written to a visible run log. Then a **deterministic rule engine, pure code, no model anywhere in it**, scores that evidence against a published registry of nine artifacts with published weights and legal authorities.
 
@@ -37,6 +39,8 @@ The output is a readiness surface you can audit:
 - every weight published on the [/methods](./app/methods/page.tsx) page
 - a downloadable **audit bundle** (findings, sources, weights, registry version) so you can recompute the score yourself
 - a run log showing every step the agent took and every guardrail that fired
+
+The score is a summary of one observation's cited evidence, not a verdict. Re-run it over time to build a baseline and see when the record changes.
 
 ## Why this architecture: neurosymbolic on purpose
 
@@ -172,6 +176,8 @@ Deliberately stubbed for v2, interfaces designed, not half-built:
 - **Client-facing report export** (planned, per the PRD's `@react-pdf/renderer` stack line): a human-readable readiness report a court administrator could circulate, generated from the same `ScanResult`. Today the audit bundle (JSON) serves the technical and audit audience; the PDF report is the executive-facing counterpart.
 - **Training pathway** (`lib/training/suggestPath.ts`, planned): per-gap staff training outlines, always labeled suggested and human reviewed. This is the readiness-delivery tier of the pyramid.
 - **Clamped config overrides** (planned): env-tunable agent bounds (`AGENT_MAX_ITERATIONS`, `AGENT_MAX_FETCHES`, `OPENAI_MODEL`) with hard ceilings enforced in code. In v1 these bounds are deliberately hardcoded: they are guardrails, and a guardrail you can change from a dashboard without review or CI is not a guardrail. v2 wires them as overrides that can only turn within a pre-approved, code-enforced range.
+- **Memory** (planned): v1 writes each completed scan to an append-only log (write-only, a side effect that cannot affect the scan). v2 turns on read and analyze: the baseline strengthens and converges across scans, and change detection flags when a court's record moves. This is what turns a one-shot scan into a living readiness baseline, and how an adaptive agent becomes reliable without being caged.
+- **Confirmation intake** (planned): recording a court's response to a draft inquiry and flipping a finding to `verified`. Requires the persistence layer above. A version that let anyone mark a finding verified without the court's confirming document would break the core promise, so it is not shipped in a stateless v1.
 
 The rule for all of these: stub, do not half-build. Each lands as an isolated module behind its existing hook without touching the core.
 
@@ -179,6 +185,7 @@ The rule for all of these: stub, do not half-build. Each lands as an isolated mo
 
 - **Model: `gpt-5.6-terra`, selected and verified July 19, 2026.** Chosen over Sol because structured extraction showed no visible quality gain at roughly twice the input cost, and over Luna because legal-document extraction benefits from quality headroom. The model only reads and extracts; it never assigns the score, so tier choice affects extraction quality and cost, not scoring.
 - **Retrieval via Tavily** rather than raw fetch: court sites are frequently JavaScript apps that return an empty shell to a plain HTTP fetch. Tavily /extract reads them. Provenance still cites the court's real URL, never Tavily.
+- **Retrieval stays model-directed, on purpose.** A court's documents get renamed and moved; a fixed, hardcoded search would miss them, and missing change is the one thing this tool cannot do. Adaptivity is the value, so we keep the agent free and make reliability come from memory (see roadmap), not from caging it.
 - **Mock-first, then live.** The UI, agent, and API were all built and tested against fixtures and a stubbed model before a real key was ever wired. A live model was never attached to a broken layout.
 - **One file, one responsibility**, enforced by a guardrail script that fails the build past roughly 200 lines or five exports.
 - **Deterministic logic, AI reasoning.** Structure is code. Judgment about where to look is the model's. Judgment about the score is never the model's.
@@ -189,7 +196,7 @@ This project was built with Codex in the VS Code IDE using a creative-director w
 
 - **Codex built the code.** Every block (rule engine, tools, agent loop, API wiring, hardening, CI, add-ons) was implemented by Codex from gated, block-scoped prompts with explicit guardrails ("propose a file plan first", "do not refactor unrelated code", "stop after the PR").
 - **GPT-5.6 runs in the product.** It directs the discovery loop and performs schema-constrained extraction. It is barred, architecturally, from scoring.
-- **Every substantive Codex change entered through a pull request**, was independently re-run and verified (tests, types, build) before merge, and CI now enforces that automatically. The commit history is the collaboration log: nine scoped PRs covering the core blocks, add-ons, and release preparation.
+- **Every substantive Codex change entered through a pull request**, was independently re-run and verified (tests, types, build) before merge, and CI now enforces that automatically. The commit history is the collaboration log: over twenty scoped pull requests covering the core blocks, add-ons, and release preparation.
 - Codex also caught and fixed real issues along the way (a `next/server` import trap avoided by using web-standard `Response.json`, a CI lockfile regeneration for the Linux runner), and its proposals were sometimes overruled by human review, which is the point of the gate.
 
 **Codex Session ID:** `019f77cd-ca05-71d0-a99a-4f53da2524fd`
@@ -209,6 +216,8 @@ Honest list, current as of submission:
 - The rate limiter is in-memory and per-instance. On serverless it resets across instances; the real backstop is provider spend caps. v2: durable store.
 - The client-IP read trusts `x-forwarded-for`, correct behind Vercel's proxy, weak on a bare deployment.
 - An empty model reply surfaces as a caught scan failure rather than a friendlier partial state.
+- A live scan is an independent, point-in-time observation. v1 is stateless, so it re-hunts from scratch each run and results can vary between scans. The scoring is deterministic and recomputable given the evidence a scan gathered; convergence across scans is v2 (memory). The cached sample is a frozen representative scan for stable review.
+- No confirmation intake in v1: a finding reaches `verified` only through out-of-band human confirmation (the tool drafts the inquiry, a human sends it, the court responds). v1 has no UI to record that response, so live scans produce only `found` and `not_located`.
 - One court, one registry version. The registry is versioned (`registry.v1.json`) precisely so coverage can grow without breaking old audits.
 - A not-located finding means we could not locate public evidence. It does not mean the artifact does not exist. This is a feature, but it bears repeating.
 - The Content-Security-Policy header ships report-only in v1: violations are logged, nothing is blocked. Enforcing it requires per-request script nonces, which is v2 work.
