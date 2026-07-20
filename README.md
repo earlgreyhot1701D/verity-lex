@@ -169,10 +169,11 @@ Shipped in this window:
 
 - **Audit export** (`lib/audit/export.ts`): download the bundle, recompute it yourself
 - **Methods page** (`app/methods/page.tsx`): every artifact, weight, tier, and legal authority, published
+- **Draft public inquiry letters** (`components/VerificationAct.tsx`): Section 4 queues every `not_located` finding and reveals a static, artifact-specific inquiry grounded in its governing authority. The tool drafts, a human reviews and sends, and only the court's confirming response can support `verified`.
 
 Deliberately stubbed for v2, interfaces designed, not half-built:
 
-- **Draft inquiry email** (`lib/verify/draftInquiry.ts`, planned): when evidence is not located, the product already ships a draft public-records inquiry letter to the court's Records Access Officer, behind a human gate in the Verification act: the tool drafts, a human reviews and sends. Today that draft is a static template; v2 has GPT-5.6 tailor it to the specific gap, institution, and governing authority.
+- **Model-tailored inquiry drafts** (planned): GPT-5.6 tailors the shipped static inquiry template to the specific gap, institution, and governing authority while preserving the human review-and-send gate.
 - **Client-facing report export** (planned, per the PRD's `@react-pdf/renderer` stack line): a human-readable readiness report a court administrator could circulate, generated from the same `ScanResult`. Today the audit bundle (JSON) serves the technical and audit audience; the PDF report is the executive-facing counterpart.
 - **Training pathway** (`lib/training/suggestPath.ts`, planned): per-gap staff training outlines, always labeled suggested and human reviewed. This is the readiness-delivery tier of the pyramid.
 - **Clamped config overrides** (planned): env-tunable agent bounds (`AGENT_MAX_ITERATIONS`, `AGENT_MAX_FETCHES`, `OPENAI_MODEL`) with hard ceilings enforced in code. In v1 these bounds are deliberately hardcoded: they are guardrails, and a guardrail you can change from a dashboard without review or CI is not a guardrail. v2 wires them as overrides that can only turn within a pre-approved, code-enforced range.
