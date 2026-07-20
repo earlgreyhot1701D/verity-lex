@@ -18,7 +18,10 @@
     "test:agent-loop": "node --experimental-strip-types --experimental-specifier-resolution=node lib/agent/controller.test.mjs",
     "test:scan-route": "node --experimental-strip-types --experimental-specifier-resolution=node app/api/scan/route.test.mjs",
     "test:hardening": "node --experimental-strip-types --test lib/validate.test.mjs lib/rateLimit.test.mjs",
-    "test:audit": "node --experimental-strip-types --test lib/audit/export.test.mjs"
+    "test:audit": "node --experimental-strip-types --test lib/audit/export.test.mjs",
+    "test": "npm run test:rule-engine && npm run test:agent-tools && npm run test:agent-loop && npm run test:scan-route && npm run test:hardening && npm run test:audit",
+    "typecheck": "tsc --noEmit",
+    "verify": "npm run selfcheck && npm run test && npm run typecheck && npm run build"
   },
   "dependencies": {
     "next": "16.2.6",
