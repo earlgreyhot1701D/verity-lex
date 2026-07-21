@@ -266,6 +266,10 @@ Honest list, current as of submission:
 - The Content-Security-Policy header ships report-only in v1: violations are logged, nothing is blocked. Enforcing it requires per-request script nonces, which is v2 work.
 - One state in v1: the scoring registry is California-specific by design. Scanning a non-California institution would score it against the wrong authorities, so the UI limits selection to California superior courts, and only courts with a human-verified official domain are selectable.
 
+## Privacy & Analytics
+
+Verity Lex uses basic, privacy-friendly [Vercel Web Analytics](https://vercel.com/docs/analytics) on its live deployment. It operates cookielessly, collects zero personally identifiable information (PII), and does not track user identity or activity across sites. Scans remain strictly stateless.
+
 ## License
 
 MIT. See [LICENSE](./LICENSE).

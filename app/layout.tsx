@@ -1,6 +1,7 @@
 /** Defines global document metadata and the Verity Lex page shell. */
 
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const metadataBase = process.env.VERCEL_PROJECT_PRODUCTION_URL
@@ -49,7 +50,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
