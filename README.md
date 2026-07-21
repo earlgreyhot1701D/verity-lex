@@ -11,7 +11,7 @@ Built for California superior courts. Registry v1.0 scores against California au
 Built for OpenAI Build Week 2026 (Work and Productivity track) with Codex and GPT-5.6.
 AI assisted. Human approved.
 
-[Live demo](https://verity-lex.vercel.app) · [Methods](https://verity-lex.vercel.app/methods) · [Demo video](VIDEO-URL-PENDING)
+[Live demo](https://verity-lex.vercel.app) · [Methods](https://verity-lex.vercel.app/methods) · [Demo video](https://youtu.be/aEg4BB8-ad0)
 
 ---
 
@@ -71,6 +71,8 @@ Would you trust an AI to grade its own homework? Neither would a court. Most AI 
 Ask an LLM to score a court twice on the same evidence and you get two numbers. Verity Lex structurally cannot: given the same evidence, the score is identical, every time. The model gathers and reads. It has no path to the score. That constraint is the product.
 
 ## The wedge today, the pyramid tomorrow
+
+![The wedge today, the pyramid tomorrow](./public/images/pyramid.png)
 
 The thesis: you earn the right to sell a solution by understanding the institution first. That understanding has an order, and each tier depends on the one beneath it.
 
@@ -186,7 +188,7 @@ npm run build
 
 CI runs all of the above on every pull request and push to main, plus a lockfile drift guard and a non-blocking `npm audit`. Every feature in this repo entered through a pull request, manually reviewed by the project author before merge, with CI green.
 
-The audit test is the thesis in miniature: it takes a generated audit bundle and recomputes the score by hand from only the bundle's own findings and weights, then asserts it matches the engine. If the bundle ever stops carrying enough information to check our math, the build fails.
+The audit test is the thesis in miniature: it takes a generated audit bundle and recomputes the score by hand from only the bundle's own fields and weights, then asserts it matches the engine. If the bundle ever stops carrying enough information to check our math, the build fails.
 
 ## Add-ons shipped, and v2 stubs
 
@@ -206,6 +208,18 @@ Deliberately stubbed for v2, interfaces designed, not half-built:
 - **Confirmation intake** (planned): recording a court's response to a draft inquiry and flipping a finding to `verified`. Requires the persistence layer above. A version that let anyone mark a finding verified without the court's confirming document would break the core promise, so it is not shipped in a stateless v1.
 
 The rule for all of these: stub, do not half-build. Each lands as an isolated module behind its existing hook without touching the core.
+
+## Roadmap (v2)
+
+v1 is a live observer with deterministic scoring. v2 makes the observation reliable and the baseline durable.
+
+- **Ensemble extraction (score stability).** GPT-5.6 exposes no temperature control, so a single scan's reading varies. v2 runs each document's extraction K times concurrently and accepts a signal only on a majority vote, with per-element voting for element-scored artifacts. Parallel, so near-zero added latency; ~K× the extraction spend (still under a dollar/scan). Tightens the score distribution without caging the agent.
+- **Deterministic quote verification (anti-hallucination).** Accept a finding only if its quoted span actually appears (string match) in the fetched document. Pure code, no model, catches a fabricated citation. Pairs with the ensemble vote: consensus kills sampling noise, the string match kills hallucination.
+- **Memory (baseline + change detection).** v1 writes every scan to an append-only log (write-only, a side effect that can't affect the scan). v2 turns on read/analyze: baselines strengthen and converge across scans, and change detection flags when a court's record moves. Turns a one-shot scan into a living readiness baseline.
+- **Three-quantity scoring.** Report supported, unresolved, and total possible points separately, so a not-located artifact reads as unresolved uncertainty rather than a silent zero.
+- **Separate compliance from maturity.** Split required legal duties from recommended/aspirational items instead of blending them into one number.
+- **Confirmation intake.** Record a court's response to a draft inquiry and flip a finding to verified (requires the persistence layer above).
+- **Coverage.** All 58 California superior courts as domains are human-verified, then other public-institution types with their own registry versions.
 
 ## Design decisions
 
