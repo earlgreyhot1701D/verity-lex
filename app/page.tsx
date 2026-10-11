@@ -19,6 +19,7 @@ export default function Home() {
   const [scanFormKey, setScanFormKey] = useState(0);
 
   const observe = async (institution: string, targetDomain: string) => {
+    if (phase === "observing") return;
     const validated = validateScanInput(institution, targetDomain);
     if (!validated.ok) {
       setError(validated.error);
@@ -33,7 +34,11 @@ export default function Home() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(validated.value),
+        signal: AbortSignal.timeout(55_000),
       });
+      if (!response.headers.get("content-type")?.includes("application/json")) {
+        throw new Error("The scan service did not return a result. Please try again or load the cached sample.");
+      }
       const body = (await response.json()) as ScanResult | { error?: { message?: string } };
       if (!response.ok || !("findings" in body)) {
         throw new Error("error" in body ? body.error?.message : "The scan request failed.");
@@ -61,13 +66,13 @@ export default function Home() {
 
   return (
     <main>
-      <ScanAct key={scanFormKey} onObserve={observe} onLoadSample={loadSample} />
-      {error ? <p role="alert">{error}</p> : null}
+      <ScanAct key={scanFormKey} onObserve={observe} onLoadSample={loadSample} busy={phase === "observing"} />
       <MarqueeTicker />
       <ObservationAct
         runLog={phase === "done" && scan ? scan.runLog : []}
         phase={phase}
         onClear={clearResults}
+        error={error}
       />
       <SurfaceAct scan={scan} findings={scan?.findings ?? []} score={scan?.score ?? null} />
       <VerificationAct findings={scan?.findings ?? []} />

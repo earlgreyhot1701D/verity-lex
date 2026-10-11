@@ -1,6 +1,6 @@
 /** Discovery tool for finding public official-domain source URLs via Tavily Search; provenance remains the source URL, never Tavily. */
 
-import { logFailure } from "../../failureLog";
+import { logFailure } from "../../failureLog.ts";
 
 export interface DiscoveryResult {
   title: string;
@@ -10,7 +10,7 @@ export interface DiscoveryResult {
 
 const TAVILY_SEARCH_URL = "https://api.tavily.com/search";
 
-export async function discoverOfficialSources(query: string, targetDomain: string, maxResults = 5): Promise<DiscoveryResult[]> {
+export async function discoverOfficialSources(query: string, targetDomain: string, maxResults = 5, signal?: AbortSignal): Promise<DiscoveryResult[]> {
   try {
     const response = await fetch(TAVILY_SEARCH_URL, {
       method: "POST",
@@ -19,6 +19,7 @@ export async function discoverOfficialSources(query: string, targetDomain: strin
         Authorization: `Bearer ${process.env.TAVILY_API_KEY ?? ""}`,
       },
       body: JSON.stringify({ query: `${query} site:${targetDomain}`, max_results: maxResults }),
+      signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(10_000)]) : AbortSignal.timeout(10_000),
     });
 
     if (!response.ok) {
@@ -33,7 +34,7 @@ export async function discoverOfficialSources(query: string, targetDomain: strin
     }));
   } catch (error) {
     logFailure("discover", error, { query, targetDomain });
-    return [];
+    throw error;
   }
 }
 

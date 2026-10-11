@@ -1,6 +1,7 @@
 /** Model-directed ReAct controller that discovers, fetches, extracts, then delegates all scoring to the pure rule engine. */
 
 import { logFailure } from "../failureLog.ts";
+import { scanError } from "../scanError.ts";
 import type { ModelClient } from "../model/openai";
 import type { Registry, RuleSignal } from "../ruleEngine/evaluate";
 import type { ScanResult, Source } from "../types";
@@ -61,6 +62,7 @@ export async function runAgentLoop(options: AgentOptions): Promise<ScanResult> {
 
     if (action.action === "fetch" && action.url && discovered.has(action.url) && isOfficialSource(action.url, options.targetDomain)) {
       const result = await options.tools.fetch(action.url, options.limits.timeoutMs);
+      if (!result.ok && result.error && scanError(new Error(result.error)).code !== "SCAN_FAILED") throw new Error(result.error);
       fetches += 1;
       fetched.set(action.url, result);
       runLog.push(step("fetch", result.ok ? `fetched ${action.url}` : `fetch failed ${action.url}`, result.ok));
@@ -132,6 +134,7 @@ async function observeExtraction(
     return true;
   } catch (error) {
     logFailure("extract", error, { url: fetched.url });
+    if (scanError(error).code !== "SCAN_FAILED") throw error;
     runLog.push(step("extract", `extract failed ${fetched.url}`, false));
     return false;
   }

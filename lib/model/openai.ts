@@ -1,4 +1,4 @@
-/** Server-only GPT-5.6 Responses API adapter; callers retain a keyless stub fallback. */
+/** Server-only bounded GPT-5.6 Responses adapter with a separate stub for offline tests. */
 
 import OpenAI from "openai";
 
@@ -20,7 +20,7 @@ export function createStubModelClient(responses: Record<string, string> = {}): M
   };
 }
 
-export function createOpenAIModelClient(): ModelClient {
+export function createOpenAIModelClient(signal?: AbortSignal): ModelClient {
   if (typeof window !== "undefined") {
     throw new Error("OpenAI model client is server-only");
   }
@@ -30,7 +30,7 @@ export function createOpenAIModelClient(): ModelClient {
     throw new Error("OPENAI_API_KEY is required for live model calls");
   }
 
-  const client = new OpenAI({ apiKey });
+  const client = new OpenAI({ apiKey, timeout: 15_000, maxRetries: 0 });
 
   return {
     async complete(request) {
@@ -42,7 +42,7 @@ export function createOpenAIModelClient(): ModelClient {
           instructions: request.system,
           input,
           text: request.responseFormat === "json" ? { format: { type: "json_object" } } : undefined,
-        });
+        }, { signal });
         return response.output_text;
       } catch (error) {
         const status = error instanceof OpenAI.APIError ? error.status : undefined;

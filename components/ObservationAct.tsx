@@ -8,9 +8,10 @@ interface ObservationActProps {
   runLog: RunStep[];
   phase: "idle" | "observing" | "done";
   onClear: () => void;
+  error: string;
 }
 
-export function ObservationAct({ runLog, phase, onClear }: ObservationActProps) {
+export function ObservationAct({ runLog, phase, onClear, error }: ObservationActProps) {
   return (
     <div className={styles.wrap}>
       <section className={styles.observation} id="observation" aria-labelledby="log-title">
@@ -28,17 +29,13 @@ export function ObservationAct({ runLog, phase, onClear }: ObservationActProps) 
           based on what it finds, then stops when it has evidence or has exhausted the
           sources. Deterministic tools do the scoring. The model directs the hunt.
         </p>
+        {error ? <p role="alert">{error}</p> : null}
         {phase === "done" ? (
           <AgentLog steps={runLog} />
         ) : phase === "observing" ? (
           <div className={`${styles.observingState} ${styles.mono}`} role="status">
             <span className={styles.observingDot} aria-hidden="true" />
-            <span>OBSERVING ·</span>
-            <span className={styles.observingPhrases}>
-              <span>SEARCHING THE PUBLIC RECORD</span>
-              <span>READING WHAT IT FINDS</span>
-              <span>EXTRACTING CITED EVIDENCE</span>
-            </span>
+            <span>OBSERVING · WAITING FOR THE SCAN · ACTIVITY LOG AVAILABLE WHEN COMPLETE</span>
           </div>
         ) : (
           <p className={`${styles.sectionMark} ${styles.mono}`}>
