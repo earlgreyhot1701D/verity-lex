@@ -122,7 +122,7 @@ Key properties, each enforced in code and covered by a test:
 - **Prompt-injection risk reduction at the retrieval boundary.** Fetched document text is wrapped in `<UNTRUSTED_DOCUMENT_TEXT>` tags at fetch time; the extractor's system prompt instructs the model to treat everything inside as data, never instructions. The planner sees URLs and tool outcomes only, never document text.
 - **Bounded autonomy.** Max 8 iterations, max 5 fetches, 10 second timeouts, all asserted by tests that prove the bounds actually trip.
 - **Dead ends are bounded twice.** The planner is shown per-URL extraction failures, and code caps extraction retries at two per URL regardless of what the model chooses.
-- **Fails safe.** No API key means the app runs on a stubbed model; the cached Santa Barbara sample remains available as an explicit, labeled option. Errors surface as structured JSON and visible UI states, never blank screens.
+- **Fails safe.** Missing provider configuration or exhausted credits produces an actionable error; the cached Santa Barbara sample remains available as an explicit, labeled option. Errors surface as structured JSON and visible UI states.
 - **Stateless.** No database. Nothing about a scanned institution is stored.
 
 ## How it compares
@@ -143,7 +143,7 @@ npm ci
 npm run dev
 ```
 
-Open http://localhost:3000. The page opens empty on purpose: no scan data appears until you run one or explicitly load the labeled sample (LOAD SAMPLE SCAN · SANTA BARBARA · CACHED). With no keys set, scans run against a stubbed model and return an honest empty surface; the cached sample is always available for a keyless demo.
+Open http://localhost:3000. The page opens empty on purpose: no scan data appears until you run one or explicitly load the labeled sample (LOAD SAMPLE SCAN · SANTA BARBARA · CACHED). With no keys set, live scans report that scanning is not configured; the cached sample is always available for a keyless demo.
 
 To run live scans, copy `.env.example` to `.env.local` and set:
 
@@ -156,7 +156,7 @@ Keys are read server-side only, never logged, never shipped to the client.
 
 ### Docker
 
-The production [`Dockerfile`](./Dockerfile) uses a multi-stage Node 22 Alpine build, prunes development dependencies, and runs the stateless Next.js service as a non-root user. Secrets are not baked into the image; pass them at runtime. Without an env file, the container still runs with the stub model and cached Santa Barbara result.
+The production [`Dockerfile`](./Dockerfile) uses a multi-stage Node 22 Alpine build, prunes development dependencies, and runs the stateless Next.js service as a non-root user. Secrets are not baked into the image; pass them at runtime. Without an env file, the container still serves the cached Santa Barbara sample and reports live scanning as unconfigured.
 
 ```bash
 docker build -t verity-lex .

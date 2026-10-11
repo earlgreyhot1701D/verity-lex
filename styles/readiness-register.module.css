@@ -496,10 +496,12 @@
     width: min(100% - 32px, 1140px);
   }
 
-  .brand .mono,
-  .navLinks {
+  .brand .mono {
     display: none;
   }
+
+  .nav { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .navLinks { display: flex; flex-wrap: wrap; gap: 12px 18px; }
 
   .hero {
     gap: 34px;

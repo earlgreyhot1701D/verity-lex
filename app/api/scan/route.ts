@@ -1,10 +1,12 @@
-/** Exposes cached and stub-model public-record scans behind a validated JSON API. */
+/** Exposes cached and bounded live public-record scans with actionable provider failures. */
 
 import { cachedSantaBarbaraScan } from "../../../data/mockScan.ts";
+import { californiaSuperiorCourts } from "../../../data/courts.ca.ts";
 import registryData from "../../../data/registry.v1.json" with { type: "json" };
 import { runAgentLoop } from "../../../lib/agent/controller.ts";
 import { logFailure } from "../../../lib/failureLog.ts";
-import { createOpenAIModelClient, createStubModelClient } from "../../../lib/model/openai.ts";
+import { createOpenAIModelClient } from "../../../lib/model/openai.ts";
+import { scanError } from "../../../lib/scanError.ts";
 import { createRateLimiter } from "../../../lib/rateLimit.ts";
 import { evaluate, type Registry } from "../../../lib/ruleEngine/evaluate.ts";
 import { validateScanInput } from "../../../lib/validate.ts";
@@ -45,11 +47,16 @@ export async function POST(request: Request): Promise<Response> {
   if (!validated.ok) {
     return errorResponse(400, "INVALID_INPUT", validated.error);
   }
+  if (!californiaSuperiorCourts.some((court) => court.live && court.name === validated.value.institution && court.domain === validated.value.targetDomain)) {
+    return errorResponse(400, "UNSUPPORTED_COURT", "Live scanning is currently available for Santa Barbara Superior Court only. Other courts are coming soon.");
+  }
 
   try {
-    const model = process.env.OPENAI_API_KEY?.trim()
-      ? createOpenAIModelClient()
-      : createStubModelClient();
+    if (!process.env.OPENAI_API_KEY?.trim() || !process.env.TAVILY_API_KEY?.trim()) {
+      return errorResponse(503, "SCAN_NOT_CONFIGURED", "Live scanning is not configured. Please load the cached sample.");
+    }
+    const signal = AbortSignal.timeout(50_000);
+    const model = createOpenAIModelClient(signal);
     const result = await runAgentLoop({
       ...validated.value,
       registry,
@@ -58,11 +65,11 @@ export async function POST(request: Request): Promise<Response> {
       tools: {
         discover: async (query, domain) => {
           const { discoverOfficialSources } = await import("../../../lib/agent/tools/discover.ts");
-          return discoverOfficialSources(query, domain);
+          return discoverOfficialSources(query, domain, 5, signal);
         },
         fetch: async (url, timeoutMs) => {
           const { fetchPublicSource } = await import("../../../lib/agent/tools/fetch.ts");
-          return fetchPublicSource(url, timeoutMs);
+          return fetchPublicSource(url, timeoutMs, signal);
         },
         extract: async (url, text) => {
           const { extractSignals } = await import("../../../lib/agent/tools/extract.ts");
@@ -74,7 +81,8 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json(result);
   } catch (error) {
     logFailure("api/scan", error, { path: "POST /api/scan" });
-    return errorResponse(500, "SCAN_FAILED", "The public-record scan could not be completed.");
+    const failure = scanError(error);
+    return errorResponse(failure.status, failure.code, failure.message);
   }
 }
 

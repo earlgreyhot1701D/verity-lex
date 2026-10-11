@@ -9,9 +9,10 @@ import styles from "@/styles/readiness-register.module.css";
 interface ScanActProps {
   onObserve: (institution: string, targetDomain: string) => void;
   onLoadSample: () => void;
+  busy: boolean;
 }
 
-export function ScanAct({ onObserve, onLoadSample }: ScanActProps) {
+export function ScanAct({ onObserve, onLoadSample, busy }: ScanActProps) {
   const observe = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -34,7 +35,7 @@ export function ScanAct({ onObserve, onLoadSample }: ScanActProps) {
           <a href="#scan">Scan</a>
           <a href="/methods">Method</a>
           <a href="/methods#methods-title">Rubric</a>
-          <a href="/#observation">Field Notes</a>
+          <a href="#observation">Field Notes</a>
           <a
             href="https://earlgreyhot1701d.github.io/Clew-Labs/"
             target="_blank"
@@ -95,7 +96,7 @@ export function ScanAct({ onObserve, onLoadSample }: ScanActProps) {
             <span>§ 01 · BEGIN OBSERVATION</span>
             <span className={styles.statusChip}>
               <span className={styles.statusDot} aria-hidden="true" />
-              SYSTEM READY
+              {busy ? "OBSERVATION IN PROGRESS" : "SELECT A COURT"}
             </span>
           </div>
           <h2>NAME A COURT.</h2>
@@ -111,7 +112,7 @@ export function ScanAct({ onObserve, onLoadSample }: ScanActProps) {
             <label className={styles.visuallyHidden} htmlFor="court-name">
               Court name
             </label>
-            <select id="court-name" name="court" defaultValue="" required>
+            <select id="court-name" name="court" defaultValue="" required disabled={busy}>
               <option value="" disabled>
                 SELECT A CALIFORNIA COURT
               </option>
@@ -126,16 +127,18 @@ export function ScanAct({ onObserve, onLoadSample }: ScanActProps) {
                 </option>
               ))}
             </select>
-            <button type="submit">OBSERVE →</button>
+            <button type="submit" disabled={busy}>{busy ? "OBSERVING…" : "OBSERVE →"}</button>
           </div>
           <button
             className={`${styles.sampleControl} ${styles.mono}`}
             type="button"
             onClick={onLoadSample}
+            disabled={busy}
           >
             LOAD SAMPLE SCAN · SANTA BARBARA · CACHED JULY 18
           </button>
           <div className={styles.scanNotes}>
+            <p className={`${styles.finePrint} ${styles.mono}`}>SANTA BARBARA IS LIVE · OTHER COURTS ARE COMING SOON</p>
             <p className={`${styles.finePrint} ${styles.mono}`}>
               NO LOGIN · PUBLIC DATA ONLY · EVERY CLAIM CITED
             </p>

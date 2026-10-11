@@ -26,13 +26,22 @@ export async function extractSignals(sourceUrl: string, documentText: string, mo
     responseFormat: "json",
   });
   const parsed = JSON.parse(raw) as unknown;
-  return validateExtraction(parsed);
+  const result = validateExtraction(parsed);
+  if (result.sourceUrl !== sourceUrl) throw new Error("Extraction source URL does not match the fetched document");
+  for (const signal of result.signals) {
+    if (signal.present && (!signal.quotedSpan.trim() || !documentText.includes(signal.quotedSpan))) {
+      throw new Error("Extraction quote is not present in the fetched document");
+    }
+    if (!signal.present && signal.quotedSpan !== "") throw new Error("Unlocated signals must have empty quotes");
+  }
+  return result;
 }
 
 export function validateExtraction(value: unknown): ExtractionResult {
   if (!isRecord(value) || typeof value.sourceUrl !== "string" || !Array.isArray(value.signals)) {
     throw new Error("Extraction result must include sourceUrl and signals");
   }
+  if (Object.keys(value).some((key) => !["sourceUrl", "signals"].includes(key))) throw new Error("Unknown extraction property");
 
   const signals = value.signals.map((signal) => {
     if (!isRecord(signal) || typeof signal.artifactId !== "string" || typeof signal.present !== "boolean") {
@@ -42,9 +51,14 @@ export function validateExtraction(value: unknown): ExtractionResult {
     if (typeof signal.quotedSpan !== "string") {
       throw new Error("Extraction signal must include quotedSpan");
     }
+    if (!artifactIds.includes(signal.artifactId)) throw new Error("Unknown registry artifact");
+    if (Object.keys(signal).some((key) => !["artifactId", "present", "quotedSpan", "elementsPresent"].includes(key))) throw new Error("Unknown signal property");
 
     if (signal.elementsPresent !== undefined && !isStringArray(signal.elementsPresent)) {
       throw new Error("elementsPresent must be an array of strings");
+    }
+    if (Array.isArray(signal.elementsPresent) && (signal.artifactId !== "genai_policy" || signal.elementsPresent.some((element) => !genAiElements.includes(element)))) {
+      throw new Error("Invalid registry elements");
     }
 
     return {

@@ -95,7 +95,7 @@ export function VerificationAct({ findings }: VerificationActProps) {
             );
           }) : (
             <p className={`${styles.queueLabel} ${styles.mono}`}>
-              NOTHING IN QUEUE · ALL ARTIFACTS LOCATED OR VERIFIED
+              {findings.length ? "NOTHING IN QUEUE · ALL ARTIFACTS LOCATED OR VERIFIED" : "NO OBSERVATION YET · RUN A SCAN OR LOAD THE SAMPLE"}
             </p>
           )}
         </div>

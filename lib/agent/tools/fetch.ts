@@ -1,6 +1,6 @@
 /** Fetch tool for reading public source documents as untrusted text through Tavily Extract, with bounded timeout and safe error states. */
 
-import { logFailure } from "../../failureLog";
+import { logFailure } from "../../failureLog.ts";
 
 export interface FetchResult {
   ok: boolean;
@@ -12,7 +12,7 @@ export interface FetchResult {
 
 const TAVILY_EXTRACT_URL = "https://api.tavily.com/extract";
 
-export async function fetchPublicSource(url: string, timeoutMs = 10_000): Promise<FetchResult> {
+export async function fetchPublicSource(url: string, timeoutMs = 10_000, signal?: AbortSignal): Promise<FetchResult> {
   const fetchedAt = new Date().toISOString();
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
@@ -25,7 +25,7 @@ export async function fetchPublicSource(url: string, timeoutMs = 10_000): Promis
         Authorization: `Bearer ${process.env.TAVILY_API_KEY ?? ""}`,
       },
       body: JSON.stringify({ urls: [url], extract_depth: "basic" }),
-      signal: controller.signal,
+      signal: signal ? AbortSignal.any([signal, controller.signal]) : controller.signal,
     });
 
     if (!response.ok) {
@@ -34,6 +34,7 @@ export async function fetchPublicSource(url: string, timeoutMs = 10_000): Promis
 
     const payload = (await response.json()) as { results?: Array<{ raw_content?: string; content?: string }> };
     const text = payload.results?.[0]?.raw_content ?? payload.results?.[0]?.content ?? "";
+    if (!text.trim()) throw new Error("Tavily extract returned no readable document content");
     return { ok: true, url, text: wrapUntrusted(text), fetchedAt };
   } catch (error) {
     const failure = logFailure("fetch", error, { url });
